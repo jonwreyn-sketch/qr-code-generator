@@ -1,0 +1,12 @@
+# Ignore local-only and generated artifacts
+.DS_Store
+node_modules/
+.env
+.env.*
+!.env.example
+.vercel/
+coverage/
+*.log
+*.local
+.vscode/
+.idea/
