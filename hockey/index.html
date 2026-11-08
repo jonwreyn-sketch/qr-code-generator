@@ -125,7 +125,7 @@
           </div>
         </div>
         <div class="board-stage" id="board-stage">
-          <svg class="board-canvas" id="board" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 465 902" width="465" height="902" aria-label="Interactive portrait hockey rink whiteboard" tabindex="0" data-tool="select"><g id="rinkLayer"></g><g id="drawLayer"></g><g id="previewLayer" pointer-events="none"></g></svg>
+          <svg class="board-canvas" id="board" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 465 886" width="465" height="886" aria-label="Interactive portrait hockey rink whiteboard" tabindex="0" data-tool="select"><g id="rinkLayer"></g><g id="drawLayer"></g><g id="previewLayer" pointer-events="none"></g></svg>
         </div>
         <footer class="workspace-footer"><div id="status" role="status" aria-live="polite">Choose a tool from the menu to start your drill.</div><span class="saved-indicator" id="save-state">On this device</span></footer>
       </main>
@@ -160,7 +160,7 @@ const TOOL = {
   erase:{name:'Eraser',hint:'Tap an object to remove it. Undo brings it back.'}
 };
 let tool = 'select', color = '#1c2933', items = [], history = [], future = [], gesture = null, selected = -1;
-let rinkMode = 'full', orientation = 'portrait', canonicalView = {width:465,height:902}, view = {width:465,height:902}, menuOpen = false;
+let rinkMode = 'full', orientation = 'portrait', canonicalView = {width:465,height:886}, view = {width:465,height:886}, menuOpen = false;
 let playerLabel = 'F1', textLabel = 'Note';
 const mobile = window.matchMedia('(max-width:760px)');
 const GROUPS = {move:['select'],draw:['pen','text'],routes:['skate','pass','shot'],players:['player'],objects:['puck','cone'],erase:['erase']};
@@ -176,17 +176,17 @@ const copy = value => JSON.parse(JSON.stringify(value));
 function renderRink(rinkLayer, mode = 'full') {
   rinkLayer.replaceChildren();
   const half = mode === 'half';
-  const view = { width: 465, height: half ? 471 : 902 };
+  const view = { width: 465, height: half ? 463 : 886 };
   if (mode === 'blank') {
-    rinkLayer.append(el('rect', { width:465, height:902, rx:10, fill:'#fff' }));
+    rinkLayer.append(el('rect', { width:465, height:886, rx:10, fill:'#fff' }));
     return view;
   }
   const red = '#d74450', blue = '#3979b8', board = '#253b51';
   const clipId = 'hockey-rink-ice-clip';
-  const topHalf = 'M20 451 V160 A140 140 0 0 1 160 20 H305 A140 140 0 0 1 445 160 V451';
+  const topHalf = 'M20 443 V120 A100 100 0 0 1 120 20 H345 A100 100 0 0 1 445 120 V443';
   const iceShape = () => half
     ? el('path', { d: topHalf + ' Z' })
-    : el('rect', { x: 20, y: 20, width: 425, height: 862, rx: 140 });
+    : el('rect', { x: 20, y: 20, width: 425, height: 846, rx: 100 });
   const defs = el('defs');
   const clip = el('clipPath', { id: clipId });
   clip.append(iceShape());
@@ -207,18 +207,18 @@ function renderRink(rinkLayer, mode = 'full') {
     add('line', { x1, y1, x2, y2, stroke: color, 'stroke-width': width }, parent);
 
   if (mode !== 'blank') {
-    // Remove another 20% from the remaining circle-to-blue-line gap on each end.
+    // Remove another 10% from the remaining circle-to-blue-line gap on each end.
     // The neutral zone remains 250 units wide.
-    [326, 576].forEach(y => line(20, y, 445, y, blue, 5));
-    line(20, 451, 445, 451, red, 5);
+    [318, 568].forEach(y => line(20, y, 445, y, blue, 5));
+    line(20, 443, 445, 443, red, 5);
     // Small white interruptions make the red centre line easy to distinguish.
     for (let x = 25; x < 445; x += 18) {
-      line(x, 451, x + 7, 451, '#fff', 1.5);
+      line(x, 443, x + 7, 443, '#fff', 1.5);
     }
-    [75, 827].forEach(y => line(20, y, 445, y, red));
+    [75, 811].forEach(y => line(20, y, 445, y, red));
 
-    add('circle', { cx: 232.5, cy: 451, r: 75, fill: 'none', stroke: blue, 'stroke-width': 1.2 });
-    add('circle', { cx: 232.5, cy: 451, r: 2.5, fill: blue });
+    add('circle', { cx: 232.5, cy: 443, r: 75, fill: 'none', stroke: blue, 'stroke-width': 1.2 });
+    add('circle', { cx: 232.5, cy: 443, r: 2.5, fill: blue });
 
     function faceoff(cx, cy) {
       add('circle', { cx, cy, r: 75, fill: 'none', stroke: red, 'stroke-width': 1.1 });
@@ -238,10 +238,10 @@ function renderRink(rinkLayer, mode = 'full') {
         }
       }
     }
-    for (const y of [175, 727]) {
+    for (const y of [175, 711]) {
       for (const x of [122.5, 342.5]) faceoff(x, y);
     }
-    for (const y of [351, 551]) {
+    for (const y of [343, 543]) {
       for (const x of [122.5, 342.5]) add('circle', { cx: x, cy: y, r: 5, fill: red });
     }
 
@@ -274,13 +274,13 @@ function renderRink(rinkLayer, mode = 'full') {
       for (const x of [-15, 15]) add('circle', { cx: x, cy: 0, r: 1.5, fill: red }, group);
     }
     goal(75, 0, 'hockey-rink-top-net-clip');
-    if (!half) goal(827, 180, 'hockey-rink-bottom-net-clip');
+    if (!half) goal(811, 180, 'hockey-rink-bottom-net-clip');
   }
 
   // Half-rink boards terminate at centre ice; the open edge is not a new end wall.
   const outline = half
     ? el('path', { d: topHalf })
-    : el('rect', { x: 20, y: 20, width: 425, height: 862, rx: 140 });
+    : el('rect', { x: 20, y: 20, width: 425, height: 846, rx: 100 });
   outline.setAttribute('fill', 'none');
   outline.setAttribute('stroke', board);
   outline.setAttribute('stroke-width', '3');
@@ -390,7 +390,7 @@ function chooseTool(next) {
   }
   syncMobileTools(); say(TOOL[tool].hint); render(); closeMobileMenu();
 }
-function data() { return {version:9,orientation,title:$('title').value,rink:rinkMode,items:copy(items)}; }
+function data() { return {version:10,orientation,title:$('title').value,rink:rinkMode,items:copy(items)}; }
 function capture() { return JSON.stringify(data()); }
 function snapshot(previous = capture()) { history.push(previous); if (history.length > 70) history.shift(); future = []; updateHistory(); }
 function updateHistory() { $('undo').disabled = !history.length; $('redo').disabled = !future.length; }
@@ -511,11 +511,11 @@ function up(event) {
 // and map the previous ice bounds onto the portrait ice exactly once.
 function normalizeBoard(input) {
   if (!input || !Array.isArray(input.items) || input.items.length > 5000) throw Error('Invalid board');
-  if (input.version !== undefined && ![1,2,3,4,5,6,7,8,9].includes(input.version)) throw Error('Unsupported board version');
+  if (input.version !== undefined && ![1,2,3,4,5,6,7,8,9,10].includes(input.version)) throw Error('Unsupported board version');
   const sourceVersion = input.version ?? 1;
   const legacy = sourceVersion === 1;
   const scaleToOriginal = {3:10/9,4:25/21,5:25/18,6:50/39};
-  const sourceOrientation = [8,9].includes(sourceVersion) && input.orientation === 'landscape' ? 'landscape' : 'portrait';
+  const sourceOrientation = [8,9,10].includes(sourceVersion) && input.orientation === 'landscape' ? 'landscape' : 'portrait';
   let pointCount = 0;
 
   function compressOriginalY(y) {
@@ -532,22 +532,32 @@ function normalizeBoard(input) {
     if (y <= 690) return 576 + (y - 595) * .8;
     return y - 38;
   }
+  function compressV9Y(y) {
+    if (y <= 250) return y;
+    if (y <= 326) return 250 + (y - 250) * (17/19);
+    if (y <= 576) return y - 8;
+    if (y <= 652) return 568 + (y - 576) * (17/19);
+    return y - 16;
+  }
   function point(value) {
     if (!Array.isArray(value) || value.length !== 2 || !value.every(v => typeof v === 'number' && Number.isFinite(v) && Math.abs(v) < 1000000)) throw Error('Invalid coordinates');
     let [x,y] = value;
-    if (sourceVersion === 9) {
-      return [Math.max(0,Math.min(465,x)),Math.max(0,Math.min(902,y))];
+    if (sourceVersion === 10) {
+      return [Math.max(0,Math.min(465,x)),Math.max(0,Math.min(886,y))];
     }
-    if (sourceVersion !== 8) {
-      if (legacy) {
-        [x,y] = [445-(y-20)*425/480,20+(x-20)*(input.rink === 'half' ? 500 : 1000)/960];
-      } else if (scaleToOriginal[sourceVersion]) {
-        y = 20 + (y - 20) * scaleToOriginal[sourceVersion];
+    if (sourceVersion !== 9) {
+      if (sourceVersion !== 8) {
+        if (legacy) {
+          [x,y] = [445-(y-20)*425/480,20+(x-20)*(input.rink === 'half' ? 500 : 1000)/960];
+        } else if (scaleToOriginal[sourceVersion]) {
+          y = 20 + (y - 20) * scaleToOriginal[sourceVersion];
+        }
+        y = compressOriginalY(y);
       }
-      y = compressOriginalY(y);
+      y = compressCurrentY(y);
     }
-    y = compressCurrentY(y);
-    return [Math.max(0,Math.min(465,x)),Math.max(0,Math.min(902,y))];
+    y = compressV9Y(y);
+    return [Math.max(0,Math.min(465,x)),Math.max(0,Math.min(886,y))];
   }
   const next = input.items.map(item => {
     if (!item || !['pen','skate','pass','shot','player','puck','cone','text'].includes(item.type)) throw Error('Unknown drawing tool');
@@ -561,13 +571,13 @@ function normalizeBoard(input) {
     return {type:item.type,x,y,color,label:String(item.label || (item.type === 'player' ? 'P' : '')).slice(0,item.type === 'player' ? 5 : 80)};
   });
   return {
-    version:9,
+    version:10,
     orientation:sourceOrientation,
     title:String(input.title || 'Hockey drill').slice(0,80),
     rink:['full','half','blank'].includes(input.rink) ? input.rink : 'full',
     items:next,
     legacy,
-    resized:sourceVersion !== 9
+    resized:sourceVersion !== 10
   };
 }
 function restore(input) {
