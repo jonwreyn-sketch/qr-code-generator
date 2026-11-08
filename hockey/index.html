@@ -167,8 +167,8 @@ const say = message => { $('status').textContent = message; };
 const markDirty = () => { $('save-state').textContent = 'Unsaved changes'; };
 const copy = value => JSON.parse(JSON.stringify(value));
 
-// Portrait coaching rink. Width and end markings retain the established proportions,
-// while each offensive zone is slightly compressed to reduce unused space on screen.
+// Portrait coaching rink. The rink keeps the compact overall size, but the zone
+// spacing follows NHL proportions: 75 ft end zones, 50 ft neutral zone, 75 ft end zone.
 function renderRink(rinkLayer, mode = 'full') {
   rinkLayer.replaceChildren();
   const half = mode === 'half';
@@ -203,15 +203,14 @@ function renderRink(rinkLayer, mode = 'full') {
     add('line', { x1, y1, x2, y2, stroke: color, 'stroke-width': width }, parent);
 
   if (mode !== 'blank') {
-    // Keep the neutral zone balanced while bringing each blue line closer to the
-    // offensive-zone faceoff circles for a more compact coaching view.
-    [285, 535].forEach(y => line(20, y, 445, y, blue, 5));
+    // NHL-style 75 / 50 / 75 zone proportions across the 200-foot rink length.
+    [313, 507].forEach(y => line(20, y, 445, y, blue, 5));
     line(20, 410, 445, 410, red, 5);
     // Small white interruptions make the red centre line easy to distinguish.
     for (let x = 25; x < 445; x += 18) {
       line(x, 410, x + 7, 410, '#fff', 1.5);
     }
-    [75, 745].forEach(y => line(20, y, 445, y, red));
+    [63, 757].forEach(y => line(20, y, 445, y, red));
 
     add('circle', { cx: 232.5, cy: 410, r: 75, fill: 'none', stroke: blue, 'stroke-width': 1.2 });
     add('circle', { cx: 232.5, cy: 410, r: 2.5, fill: blue });
@@ -234,10 +233,10 @@ function renderRink(rinkLayer, mode = 'full') {
         }
       }
     }
-    for (const y of [175, 645]) {
+    for (const y of [145, 675]) {
       for (const x of [122.5, 342.5]) faceoff(x, y);
     }
-    for (const y of [310, 510]) {
+    for (const y of [335, 485]) {
       for (const x of [122.5, 342.5]) add('circle', { cx: x, cy: y, r: 5, fill: red });
     }
 
@@ -269,8 +268,8 @@ function renderRink(rinkLayer, mode = 'full') {
       line(-15, 0, 15, 0, red, 2, group);
       for (const x of [-15, 15]) add('circle', { cx: x, cy: 0, r: 1.5, fill: red }, group);
     }
-    goal(75, 0, 'hockey-rink-top-net-clip');
-    if (!half) goal(745, 180, 'hockey-rink-bottom-net-clip');
+    goal(63, 0, 'hockey-rink-top-net-clip');
+    if (!half) goal(757, 180, 'hockey-rink-bottom-net-clip');
   }
 
   // Half-rink boards terminate at centre ice; the open edge is not a new end wall.
