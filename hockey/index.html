@@ -1,33 +1,613 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#f7f7f5"><title>Hockey Whiteboard</title><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="manifest" href="manifest.webmanifest"><style>
-*{box-sizing:border-box}body{margin:0;background:#f7f7f5;color:#242826;font-family:Inter,system-ui,sans-serif}main{max-width:1250px;margin:auto;padding:24px}header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:20px}h1{font-size:25px;letter-spacing:-1px;margin:0}.sub{color:#777;font-size:13px;margin:5px 0 0}.layout{display:grid;grid-template-columns:220px minmax(0,1fr);gap:16px}.panel{background:white;border:1px solid #e5e7e5;border-radius:16px;padding:16px}.tools{display:grid;grid-template-columns:1fr 1fr;gap:8px}button,select,input{font:inherit}button{background:white;border:1px solid #dedfdd;color:#303432;border-radius:9px;padding:10px 8px;cursor:pointer;font-size:13px}button.active{background:#202624;color:white;border-color:#202624}button:hover{border-color:#777}button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #b6d5ca}.full{grid-column:1/-1}.section{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:#888;margin:18px 0 10px}select,input[type=text]{width:100%;border:1px solid #dedfdd;border-radius:9px;padding:10px;background:white}.row{display:flex;align-items:center;gap:10px;margin-top:12px;font-size:13px}.swatches{display:flex;gap:8px;margin-top:10px}.swatches button{height:32px;width:32px;border-radius:50%;padding:0;border:3px solid white;outline:1px solid #ddd}.swatches button.chosen{outline:2px solid #222}.boardhead{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:14px}.boardhead input{max-width:270px}.canvaswrap{border:1px solid #d7dfdf;border-radius:12px;overflow:hidden;background:#f0f8f8}svg{display:block;width:100%;height:auto;touch-action:none;user-select:none}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.actions button{padding:10px 15px}.primary{background:#242826;color:white}.hint{font-size:12px;color:#888;margin-top:12px;line-height:1.5}#status{font-size:13px;color:#52665f;min-height:20px;margin-top:10px}@media(max-width:760px){.layout{grid-template-columns:1fr}.tools{grid-template-columns:repeat(4,1fr)}.section{margin-top:12px}main{padding:14px}.panel{padding:12px}}@media(max-width:450px){.tools{grid-template-columns:repeat(3,1fr)}button{font-size:12px}}
-</style></head><body><main><header><div><h1>Hockey Whiteboard</h1><p class="sub">Draw drills, plan plays, and export diagrams.</p></div><button id="new">Clear board</button></header><div class="layout"><aside class="panel"><div class="section">Tools</div><div class="tools" id="tools"><button data-tool="select" class="active">↖ Select</button><button data-tool="pen">✎ Draw</button><button data-tool="skate">➜ Skate</button><button data-tool="pass">⇢ Pass</button><button data-tool="shot">➤ Shot</button><button data-tool="player">● Player</button><button data-tool="puck">● Puck</button><button data-tool="cone">▲ Cone</button><button data-tool="text">T Text</button><button data-tool="erase">⌫ Erase</button></div><div class="section">Rink view</div><select id="rink"><option value="full">Full rink</option><option value="half">Half rink</option><option value="blank">Blank board</option></select><div class="section">Colour</div><div class="swatches" id="colors"><button class="chosen" data-color="#1c2933" style="background:#1c2933" aria-label="Black"></button><button data-color="#d94444" style="background:#d94444" aria-label="Red"></button><button data-color="#236cbd" style="background:#236cbd" aria-label="Blue"></button><button data-color="#249363" style="background:#249363" aria-label="Green"></button></div><div class="section">History</div><div class="tools"><button id="undo">↶ Undo</button><button id="redo">↷ Redo</button></div><p class="hint">Choose a tool, then tap or draw on the rink. Select to drag players and other objects. Double-click a text label to edit it.</p></aside><section class="panel"><div class="boardhead"><input id="title" type="text" maxlength="80" value="New hockey drill" aria-label="Drill title"><span class="sub">Mouse · Touch · Stylus</span></div><div class="canvaswrap"><svg id="board" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 520" aria-label="Interactive hockey rink whiteboard"><g id="rinkLayer"></g><g id="drawLayer"></g><g id="previewLayer"></g></svg></div><div class="actions"><button class="primary" id="save">Save board</button><button id="load">Load board</button><button id="png">Export PNG</button><button id="json">Export file</button><input id="file" type="file" accept=".json,application/json" hidden></div><div id="status" role="status"></div><p class="hint">Boards saved in this browser stay on this device. Export a file to back up or move your drill.</p></section></div></main><script>
-const NS='http://www.w3.org/2000/svg',board=document.getElementById('board'),rinkLayer=document.getElementById('rinkLayer'),drawLayer=document.getElementById('drawLayer'),previewLayer=document.getElementById('previewLayer');let tool='select',color='#1c2933',items=[],history=[],future=[],gesture=null,selected=-1;
-const el=(tag,attrs={})=>{let e=document.createElementNS(NS,tag);for(let [k,v] of Object.entries(attrs))e.setAttribute(k,v);return e};
-const line=(x1,y1,x2,y2,stroke='#bbd4e4',width=3,dash='')=>el('line',{x1,y1,x2,y2,stroke,'stroke-width':width,'stroke-dasharray':dash});
-function rink(){rinkLayer.replaceChildren();let mode=document.getElementById('rink').value;rinkLayer.append(el('rect',{width:1000,height:520,fill:'#f8fcfd'}));if(mode==='blank')return;
-rinkLayer.append(el('rect',{x:20,y:20,width:960,height:480,rx:115,fill:'none',stroke:'#879ca7','stroke-width':5}));
-const blue='#75b7df',red='#e69a9a';if(mode==='full'){rinkLayer.append(line(500,20,500,500,red,5),line(355,20,355,500,blue,7),line(645,20,645,500,blue,7));rinkLayer.append(el('circle',{cx:500,cy:260,r:73,fill:'none',stroke:red,'stroke-width':3}));for(let x of [230,770]){rinkLayer.append(line(x,24,x,496,red,3));for(let y of [145,375]){rinkLayer.append(el('circle',{cx:x,cy:y,r:60,fill:'none',stroke:red,'stroke-width':3}));rinkLayer.append(el('circle',{cx:x,cy:y,r:5,fill:red}))}}}else{rinkLayer.append(line(480,20,480,500,blue,7),line(245,24,245,496,red,3));for(let y of [145,375])rinkLayer.append(el('circle',{cx:245,cy:y,r:65,fill:'none',stroke:red,'stroke-width':3}))}
-for(let x of mode==='full'?[55,945]:[55]){rinkLayer.append(el('rect',{x:x-7,y:225,width:14,height:70,rx:4,fill:'#dbe8ee',stroke:'#bb5151','stroke-width':3}))}}
-function snapshot(){history.push(JSON.stringify(items));if(history.length>70)history.shift();future=[]}
-function render(){drawLayer.replaceChildren();items.forEach((it,i)=>{let g=el('g',{'data-index':i,style:'cursor:pointer'}),a=it.pts||[];if(it.type==='pen'){g.append(el('polyline',{points:a.map(p=>p.join(',')).join(' '),fill:'none',stroke:it.color,'stroke-width':4,'stroke-linecap':'round','stroke-linejoin':'round'}))}else if(['skate','pass','shot'].includes(it.type)){let [p,q]=a;let path=el('path',{d:'M'+p.join(' ')+' L'+q.join(' '),fill:'none',stroke:it.color,'stroke-width':4,'stroke-linecap':'round','stroke-dasharray':it.type==='pass'?'12 9':it.type==='shot'?'3 8':''});g.append(path);let angle=Math.atan2(q[1]-p[1],q[0]-p[0])*180/Math.PI;g.append(el('path',{d:'M -15 -9 L 0 0 L -15 9',fill:'none',stroke:it.color,'stroke-width':4,transform:'translate('+q.join(' ')+') rotate('+angle+')'}))}else if(it.type==='player'){g.append(el('circle',{cx:it.x,cy:it.y,r:19,fill:it.color,stroke:'white','stroke-width':3}));let t=el('text',{x:it.x,y:it.y+5,'text-anchor':'middle',fill:'white','font-size':15,'font-weight':700});t.textContent=it.label||'P';g.append(t)}else if(it.type==='puck'){g.append(el('circle',{cx:it.x,cy:it.y,r:9,fill:'#202323'}))}else if(it.type==='cone'){g.append(el('path',{d:'M'+it.x+' '+(it.y-17)+' l-17 32 h34 Z',fill:it.color}))}else if(it.type==='text'){let t=el('text',{x:it.x,y:it.y,fill:it.color,'font-size':22,'font-weight':600});t.textContent=it.label;g.append(t)}if(selected===i){g.setAttribute('opacity','.75')}drawLayer.append(g)})}
-function pt(e){let p=board.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(board.getScreenCTM().inverse())}function clamp(p){return [Math.max(0,Math.min(1000,p.x)),Math.max(0,Math.min(520,p.y))]}
-function hit(e){let g=e.target.closest('[data-index]');return g?Number(g.dataset.index):-1}
-function down(e){if(e.button!==undefined&&e.button!==0)return;e.preventDefault();let p=clamp(pt(e)),idx=hit(e);board.setPointerCapture(e.pointerId);if(tool==='erase'){if(idx>=0){snapshot();items.splice(idx,1);selected=-1;render()}return}if(idx>=0&&tool!=='select'){selected=idx;snapshot();gesture={kind:'move',idx,start:p,original:JSON.parse(JSON.stringify(items[idx]))};render();return}if(tool==='select'){selected=idx;if(idx>=0){snapshot();gesture={kind:'move',idx,start:p,original:JSON.parse(JSON.stringify(items[idx]))}}render();return}if(['player','puck','cone','text'].includes(tool)){snapshot();let label=tool==='player'?(prompt('Player label (e.g. F1, D1, X)','F1')||'F1').slice(0,5):tool==='text'?(prompt('Text label','Drill note')||'Drill note').slice(0,80):'';items.push({type:tool,x:p[0],y:p[1],color,label});render();return}snapshot();gesture={kind:'draw',type:tool,pts:[p,p],color};previewLayer.replaceChildren()}
-function move(e){if(!gesture)return;let p=clamp(pt(e));if(gesture.kind==='move'){let it=items[gesture.idx],o=gesture.original,dx=p[0]-gesture.start[0],dy=p[1]-gesture.start[1];if(o.pts)it.pts=o.pts.map(a=>[a[0]+dx,a[1]+dy]);else{it.x=o.x+dx;it.y=o.y+dy}render()}else{if(gesture.type==='pen')gesture.pts.push(p);else gesture.pts[1]=p;previewLayer.replaceChildren();let temp=el('polyline',{points:gesture.pts.map(a=>a.join(',')).join(' '),fill:'none',stroke:color,'stroke-width':4,'stroke-linecap':'round'});previewLayer.append(temp)}}
-function up(){if(gesture?.kind==='draw'){if(gesture.pts.length>1)items.push({type:gesture.type,pts:gesture.pts,color:gesture.color});render()}gesture=null;previewLayer.replaceChildren()}
-board.addEventListener('pointerdown',down);board.addEventListener('pointermove',move);board.addEventListener('pointerup',up);board.addEventListener('pointercancel',up);board.addEventListener('dblclick',e=>{let i=hit(e);if(i>=0&&items[i].type==='text'){snapshot();items[i].label=(prompt('Edit text',items[i].label)||items[i].label).slice(0,80);render()}});
-document.querySelectorAll('[data-tool]').forEach(b=>b.onclick=()=>{tool=b.dataset.tool;document.querySelectorAll('[data-tool]').forEach(a=>a.classList.toggle('active',a===b))});document.querySelectorAll('[data-color]').forEach(b=>b.onclick=()=>{color=b.dataset.color;document.querySelectorAll('[data-color]').forEach(a=>a.classList.toggle('chosen',a===b))});document.getElementById('rink').onchange=rink;
-document.getElementById('undo').onclick=()=>{if(!history.length)return;future.push(JSON.stringify(items));items=JSON.parse(history.pop());render()};document.getElementById('redo').onclick=()=>{if(!future.length)return;history.push(JSON.stringify(items));items=JSON.parse(future.pop());render()};
-const status=t=>document.getElementById('status').textContent=t;
-document.getElementById('new').onclick=()=>{if(!confirm('Clear all drawings?'))return;snapshot();items=[];render();status('Board cleared.')};
-function data(){return {version:1,title:document.getElementById('title').value,rink:document.getElementById('rink').value,items}}
-document.getElementById('save').onclick=()=>{try{localStorage.setItem('hockey-whiteboard',JSON.stringify(data()));status('Saved in this browser.')}catch{status('Browser storage unavailable; use Export file.')}};
-document.getElementById('load').onclick=()=>{let s=localStorage.getItem('hockey-whiteboard');if(!s){status('No saved board found on this device.');return}restore(JSON.parse(s))};
-function restore(d){if(!d||!Array.isArray(d.items)||d.items.length>5000)throw Error('Invalid board');snapshot();items=d.items;document.getElementById('title').value=String(d.title||'Hockey drill').slice(0,80);document.getElementById('rink').value=['full','half','blank'].includes(d.rink)?d.rink:'full';rink();render();status('Board loaded.')}
-function download(blob,name){let a=document.createElement('a'),url=URL.createObjectURL(blob);a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
-document.getElementById('json').onclick=()=>download(new Blob([JSON.stringify(data(),null,2)],{type:'application/json'}),'hockey-drill.json');
-document.getElementById('file').onchange=async e=>{let f=e.target.files[0];if(!f)return;try{restore(JSON.parse(await f.text()))}catch{status('Unable to open this board file.')}e.target.value=''};
-document.getElementById('load').addEventListener('contextmenu',e=>e.preventDefault());
-document.getElementById('png').onclick=()=>{let clone=board.cloneNode(true);clone.setAttribute('xmlns',NS);let xml=new XMLSerializer().serializeToString(clone),img=new Image(),url=URL.createObjectURL(new Blob([xml],{type:'image/svg+xml'}));img.onload=()=>{let c=document.createElement('canvas');c.width=2000;c.height=1040;c.getContext('2d').drawImage(img,0,0,2000,1040);c.toBlob(b=>{if(b)download(b,'hockey-drill.png');URL.revokeObjectURL(url)},'image/png')};img.onerror=()=>{status('PNG export failed.');URL.revokeObjectURL(url)};img.src=url};
-rink();render();
-</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f7f7f5">
+  <meta name="description" content="A simple hockey whiteboard for drawing drills and planning plays.">
+  <title>Hockey Whiteboard</title>
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.webmanifest">
+  <style>
+    :root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#242c29;background:#f7f7f5;font-synthesis:none;--muted:#67736d;--border:#e0e5e1;--green:#246b52;--green-light:#e9f2ed}
+    *{box-sizing:border-box}body{margin:0}button,input,select,summary{font:inherit}button,select,summary{cursor:pointer}button{color:inherit}button:disabled{cursor:default;opacity:.38}button,input,select{outline-offset:3px}button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid #75a891}button{touch-action:manipulation}button:hover:not(:disabled){background:#edf1ee}input,select{min-width:0}svg.icon{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;pointer-events:none}.icon-defs{position:absolute;width:0;height:0;overflow:hidden}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}[hidden]{display:none!important}
+    .app-shell{height:100vh;height:100dvh;min-height:420px;display:grid;grid-template-rows:66px minmax(0,1fr)}.app-header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 24px;border-bottom:1px solid var(--border);background:#fff;z-index:5}.brand{display:flex;align-items:center;gap:13px}.brand-mark{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:var(--green-light);color:var(--green)}.brand h1{font-size:18px;letter-spacing:-.45px;margin:0;font-weight:650}.header-right{display:flex;gap:10px;align-items:center}.device-note{color:var(--muted);font-size:12px}.icon-button{display:grid;place-items:center;width:40px;height:40px;padding:0;border:1px solid transparent;background:transparent;border-radius:9px}.menu-toggle{display:flex;align-items:center;gap:8px;border:1px solid var(--border);padding:0 11px;width:auto;font-size:13px;font-weight:600}.save-button{height:38px;padding:0 14px;display:flex;align-items:center;justify-content:center;gap:7px;background:var(--green);border:1px solid var(--green);border-radius:9px;color:#fff;font-size:13px;font-weight:600}.save-button:hover:not(:disabled){background:#195940}.save-button .icon{width:17px;height:17px}
+    .app-body{min-height:0;display:grid;grid-template-columns:242px minmax(0,1fr);transition:grid-template-columns .18s}.app-shell.menu-hidden .app-body{grid-template-columns:0 minmax(0,1fr)}.sidebar{width:242px;min-height:0;overflow:hidden;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:20}.menu-hidden .sidebar{visibility:hidden}.sidebar-heading{display:flex;align-items:center;justify-content:space-between;padding:14px 15px 8px}.sidebar-heading h2{margin:0;font-size:14px;font-weight:650}.sidebar-heading .icon-button{width:30px;height:30px}.sidebar-content{overflow-y:auto;overscroll-behavior:contain;padding:0 13px 20px;scrollbar-width:thin}.menu-label{margin:15px 10px 7px;color:#758077;font-size:10px;font-weight:700;letter-spacing:1.15px;text-transform:uppercase}.tool-list{display:grid;gap:3px}.tool-button{border:1px solid transparent;background:transparent;display:flex;align-items:center;gap:11px;text-align:left;width:100%;padding:8px 11px;border-radius:8px;min-height:38px;font-size:13px}.tool-button .icon{color:#68776e}.tool-button.active{background:var(--green-light);color:#20553f;font-weight:650;border-color:#dcebe1}.tool-button.active .icon{color:var(--green)}.tool-dot{margin-left:auto;width:5px;height:5px;background:var(--green);border-radius:50%;visibility:hidden}.tool-button.active .tool-dot{visibility:visible}.menu-rule{height:1px;background:var(--border);margin:15px 5px}.menu-field{display:block;padding:0 10px}.menu-field span{display:block;margin:0 0 7px;font-size:12px;font-weight:600}.menu-field select{width:100%;background:#fafbf9;border:1px solid var(--border);border-radius:8px;padding:9px;font-size:13px;color:#33413a}.swatches{display:flex;gap:12px;padding:3px 10px 1px}.swatches button{display:grid;place-items:center;height:31px;width:31px;border-radius:50%;padding:0;border:3px solid #fff;outline:1px solid #d9dfda;background:var(--swatch)}.swatches button:hover{background:var(--swatch)!important}.swatches button.chosen{outline:2px solid var(--green)}.swatches button .icon{width:15px;height:15px;color:#fff;visibility:hidden}.swatches button.chosen .icon{visibility:visible}.board-actions{margin-top:18px;padding-top:12px;border-top:1px solid var(--border)}.board-actions summary{font-size:12px;font-weight:600;padding:7px 10px;color:#526058}.board-actions .tool-button{font-size:12px}.board-actions .danger{color:#a5423e}.storage-hint{color:var(--muted);font-size:11px;line-height:1.5;margin:12px 10px 0}
+    .workspace{min-width:0;min-height:0;display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:12px;padding:18px 28px 12px}.workspace-heading{width:100%;max-width:1060px;margin:0 auto}.title-row{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:12px}.title-input{width:min(100%,380px);font-size:19px;font-weight:650;letter-spacing:-.5px;background:transparent;border:1px solid transparent;border-radius:7px;padding:5px 7px;margin-left:-7px;color:#29352f}.title-input:hover,.title-input:focus{border-color:#d1dcd4;background:#fff}.view-label{font-size:11px;letter-spacing:.3px;color:#78837c;white-space:nowrap}.board-toolbar{display:flex;align-items:center;gap:10px;min-height:44px}.active-tool{display:flex;align-items:center;gap:8px;border:1px solid #d7e1d9;border-radius:9px;background:#fff;padding:9px 11px;font-size:12px;font-weight:650;white-space:nowrap}.active-tool>.icon:first-child{color:var(--green);width:18px;height:18px}.active-tool>.chevron{width:12px;height:12px;color:#7f8a83}.tool-hint{font-size:12px;color:var(--muted);flex:1;line-height:1.4}.label-input{width:160px;border:1px solid var(--border);border-radius:8px;padding:9px 10px;font-size:13px;background:#fff}.history-actions{display:flex;gap:4px;margin-left:auto}.history-actions .icon-button{width:36px;height:36px;background:#fff;border-color:var(--border)}.board-stage{min-width:0;min-height:0;display:flex;justify-content:center;align-items:center;overflow:hidden;border:1px solid #e5eae5;border-radius:15px;background:#edf1ec;padding:10px}.board-canvas{display:block;flex-shrink:0;touch-action:none;user-select:none;-webkit-user-select:none;max-width:100%;max-height:100%;font-family:Arial,sans-serif;border-radius:10px;outline-offset:-4px}.board-canvas:focus-visible{outline:2px solid #91b19d}.board-canvas[data-tool=select]{cursor:default}.board-canvas[data-tool]:not([data-tool=select]){cursor:crosshair}.selection-outline{fill:none;stroke:#386d55;stroke-width:1.8;stroke-dasharray:5 4;pointer-events:none}.workspace-footer{min-height:20px;display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--muted);font-size:11px;line-height:1.45}.workspace-footer #status{flex:1;min-width:0;color:#4a6556}.saved-indicator{display:flex;align-items:center;gap:5px;white-space:nowrap}.saved-indicator:before{content:"";width:5px;height:5px;background:#95aa9c;border-radius:50%}.backdrop{position:fixed;inset:0;background:#17251d66;border:0;z-index:30;cursor:default}.backdrop:hover:not(:disabled){background:#17251d66}
+    @media(max-width:760px){.app-shell{grid-template-rows:58px minmax(0,1fr)}.app-header{padding:0 13px;gap:8px}.brand{gap:9px}.brand-mark,.device-note,.menu-toggle span{display:none}.brand h1{font-size:16px}.header-right{gap:6px}.menu-toggle{width:36px;height:36px;padding:0;justify-content:center}.save-button{padding:0 11px;height:36px}.app-body,.app-shell.menu-hidden .app-body{grid-template-columns:minmax(0,1fr)}.sidebar{position:fixed;inset:0 auto 0 0;height:100vh;height:100dvh;width:min(290px,calc(100vw - 44px));z-index:40;box-shadow:12px 0 40px #13271b1c;transform:translateX(-102%);visibility:hidden;transition:transform .18s,visibility .18s}.app-shell.menu-open .sidebar{transform:translateX(0);visibility:visible}.sidebar-heading{padding:17px 17px 9px}.sidebar-heading h2{font-size:16px}.sidebar-heading .icon-button{width:36px;height:36px}.sidebar-content{padding:0 15px 25px}.tool-button{min-height:41px;font-size:14px}.workspace{padding:12px 12px max(9px,env(safe-area-inset-bottom));gap:9px}.title-row{margin-bottom:7px;gap:5px}.title-input{font-size:16px;max-width:80%;padding:4px 7px}.view-label{font-size:10px}.board-toolbar{gap:7px;min-height:40px}.active-tool{padding:8px;font-size:12px;gap:5px}.tool-hint{display:none}.label-input{width:100%;max-width:135px;font-size:16px;padding:6px 8px}.history-actions{gap:4px}.history-actions .icon-button{width:32px;height:34px}.board-stage{padding:7px;border-radius:12px}.workspace-footer{font-size:10px;min-height:27px;gap:5px;align-items:flex-start}.saved-indicator{font-size:10px;margin-top:1px}}@media(max-width:355px){.brand h1{font-size:14px}.save-button span{display:none}.save-button{width:34px;padding:0}.workspace{padding-left:8px;padding-right:8px}.active-tool>.chevron{display:none}.label-input{max-width:102px}.saved-indicator{display:none}}@media(prefers-reduced-motion:reduce){.app-body,.sidebar{transition:none}}
+    /* Navigation follows Clearwork's sidebar / mobile bottom-bar pattern. */
+    :root{color:#162a49;background:#f5f7fb;--muted:#627087;--border:#dfe5ef;--green:#233f68;--green-light:#edf2fb;--accent:#facc15}
+    .brand-mark{background:#fff6cb;color:#263c5b}.tool-button{position:relative}.tool-button.active{background:#edf2fb;color:#162a49;border-color:transparent}.tool-button.active:before{content:"";position:absolute;left:-1px;top:8px;bottom:8px;width:3px;border-radius:3px;background:var(--accent)}.tool-dot{background:#dbb10b}.board-stage{background:#edf1f6;border-color:#e0e6ee}.title-input{color:#162a49}.view-label{color:#627087}.selection-outline{stroke:#315d96}.workspace-footer #status{color:#50627a}.mobile-tools,.mobile-context{display:none}
+    @media(max-width:760px){
+      .app-shell{padding-bottom:calc(72px + env(safe-area-inset-bottom))}.workspace{padding-bottom:9px}.mobile-tools{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));position:fixed;inset:auto 0 0;height:calc(72px + env(safe-area-inset-bottom));padding:0 5px env(safe-area-inset-bottom);border-top:1px solid #e7ebf2;border-radius:18px 18px 0 0;background:#fff;box-shadow:0 -4px 22px #162a490b;z-index:10}.mobile-indicator{position:absolute;top:-12px;left:0;width:44px;height:44px;border-radius:50%;background:var(--accent);transform:translateX(var(--nav-x,0px));transition:transform .3s;pointer-events:none}.mobile-tool{position:relative;display:flex;align-items:center;justify-content:flex-start;flex-direction:column;gap:8px;padding:11px 0 9px;height:72px;border:0;background:transparent!important;color:#627087;min-width:0}.mobile-tool .icon{width:21px;height:21px;transition:transform .3s;color:#627087}.mobile-tool span{font-size:10px;line-height:1.2}.mobile-tool.active{color:#162a49;font-weight:700}.mobile-tool.active .icon{transform:translateY(-14px);color:#162a49}.mobile-context:not([hidden]){display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:7px;min-height:31px}.subtools{display:flex;gap:4px}.subtools button{font-size:11px;border:1px solid #dfe5ef;background:#fff;color:#53657c;padding:6px 8px;border-radius:7px}.subtools button.active{border-color:#dfc44e;background:#fff8d9;color:#162a49;font-weight:600}.quick-colours{display:flex;gap:8px;padding:0 3px}.quick-colours button{width:21px;height:21px;border:2px solid white;outline:1px solid #dfe5ef;border-radius:50%;padding:0;background:var(--swatch)!important}.quick-colours button.chosen{outline:2px solid #536b8d}
+    }
+    @media(prefers-reduced-motion:reduce){.mobile-indicator,.mobile-tool .icon{transition:none}}
+  </style>
+</head>
+<body>
+  <svg class="icon-defs" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+    <symbol id="i-rink" viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="5"/><path d="M6 12h12M6 8h12M6 16h12"/><circle cx="12" cy="12" r="2"/></symbol>
+    <symbol id="i-select" viewBox="0 0 24 24"><path d="m5 3 14 10-7 1-3 7-4-18Z"/></symbol>
+    <symbol id="i-pen" viewBox="0 0 24 24"><path d="m15 4 5 5-10 10-6 1 1-6L15 4Zm-8 9 4 4M14 5l5 5"/></symbol>
+    <symbol id="i-skate" viewBox="0 0 24 24"><path d="M3 18c1-13 12 3 16-12M13 6h6v6"/></symbol>
+    <symbol id="i-pass" viewBox="0 0 24 24"><path d="M3 18 19 5" stroke-dasharray="3 4"/><path d="M13 5h6v6"/></symbol>
+    <symbol id="i-shot" viewBox="0 0 24 24"><path d="m3 17 13-10M6 20 19 10M12 4h8v8"/></symbol>
+    <symbol id="i-player" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v8m-2-6 2-2"/></symbol>
+    <symbol id="i-puck" viewBox="0 0 24 24"><ellipse cx="12" cy="10" rx="7" ry="4"/><path d="M5 10v4c0 5 14 5 14 0v-4"/></symbol>
+    <symbol id="i-cone" viewBox="0 0 24 24"><path d="m12 3 7 17H5L12 3ZM8 12h8M3 20h18"/></symbol>
+    <symbol id="i-text" viewBox="0 0 24 24"><path d="M4 7V4h16v3M12 4v16M8 20h8"/></symbol>
+    <symbol id="i-erase" viewBox="0 0 24 24"><path d="m14 3 7 7-11 11H7L2 16 14 3ZM8 10l7 7M10 21h11"/></symbol>
+    <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 3 4 8l5 5M4 8h10a6 6 0 0 1 0 12"/></symbol>
+    <symbol id="i-redo" viewBox="0 0 24 24"><path d="m15 3 5 5-5 5m5-5H10a6 6 0 0 0 0 12"/></symbol>
+    <symbol id="i-save" viewBox="0 0 24 24"><path d="M5 3h12l4 4v14H3V3h2ZM7 3v6h10V3M7 21v-8h10v8"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7V4h7l3 3h8v13H3V7Z"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V3m-5 5 5-5 5 5M4 16v5h16v-5"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v13m-5-5 5 5 5-5M4 16v5h16v-5"/></symbol>
+    <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1"/><path d="m3 17 6-6 4 4 3-3 5 5"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M9 6V3h6v3M6 6l1 15h10l1-15M10 10v7m4-7v7"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  </defs></svg>
+  <div class="app-shell" id="app">
+    <header class="app-header" id="app-header">
+      <div class="brand">
+        <button class="icon-button menu-toggle" id="menu-toggle" aria-label="Toggle drawing menu" aria-controls="drawing-menu" aria-expanded="true"><svg class="icon"><use href="#i-menu"/></svg><span>Menu</span></button>
+        <div class="brand-mark" aria-hidden="true"><svg class="icon"><use href="#i-rink"/></svg></div>
+        <h1>Hockey Whiteboard</h1>
+      </div>
+      <div class="header-right"><span class="device-note">Your coaching board</span><button class="save-button" id="quick-save" aria-label="Save board"><svg class="icon"><use href="#i-save"/></svg><span>Save board</span></button></div>
+    </header>
+    <div class="app-body">
+      <aside class="sidebar" id="drawing-menu" aria-label="Drawing menu" tabindex="-1">
+        <div class="sidebar-heading"><h2 id="menu-title">Drawing menu</h2><button class="icon-button" id="menu-close" aria-label="Close drawing menu"><svg class="icon"><use href="#i-close"/></svg></button></div>
+        <div class="sidebar-content">
+          <nav aria-label="Drawing tools">
+            <p class="menu-label">Tools</p>
+            <div class="tool-list">
+              <button class="tool-button active" data-tool="select" aria-pressed="true"><svg class="icon"><use href="#i-select"/></svg><span>Select &amp; move</span><span class="tool-dot"></span></button>
+              <button class="tool-button" data-tool="pen" aria-pressed="false"><svg class="icon"><use href="#i-pen"/></svg><span>Freehand draw</span><span class="tool-dot"></span></button>
+              <button class="tool-button" data-tool="skate" aria-pressed="false"><svg class="icon"><use href="#i-skate"/></svg><span>Skating route</span><span class="tool-dot"></span></button>
+              <button class="tool-button" data-tool="pass" aria-pressed="false"><svg class="icon"><use href="#i-pass"/></svg><span>Pass</span><span class="tool-dot"></span></button>
+              <button class="tool-button" data-tool="shot" aria-pressed="false"><svg class="icon"><use href="#i-shot"/></svg><span>Shot</span><span class="tool-dot"></span></button>
+            </div>
+            <p class="menu-label">Add to the rink</p>
+            <div class="tool-list">
+              <button class="tool-button" data-tool="player" aria-pressed="false"><svg class="icon"><use href="#i-player"/></svg><span>Player</span><span class="tool-dot"></span></button>
+              <button class="tool-button" data-tool="puck" aria-pressed="false"><svg class="icon"><use href="#i-puck"/></svg><span>Puck</span><span class="tool-dot"></span></button>
+              <button class="tool-button" data-tool="cone" aria-pressed="false"><svg class="icon"><use href="#i-cone"/></svg><span>Cone</span><span class="tool-dot"></span></button>
+              <button class="tool-button" data-tool="text" aria-pressed="false"><svg class="icon"><use href="#i-text"/></svg><span>Text</span><span class="tool-dot"></span></button>
+              <button class="tool-button" data-tool="erase" aria-pressed="false"><svg class="icon"><use href="#i-erase"/></svg><span>Eraser</span><span class="tool-dot"></span></button>
+            </div>
+          </nav>
+          <div class="menu-rule"></div>
+          <label class="menu-field"><span>Rink view</span><select id="rink"><option value="full">Full rink</option><option value="half">Half rink</option><option value="blank">Blank board</option></select></label>
+          <p class="menu-label">Drawing colour</p>
+          <div class="swatches" aria-label="Drawing colour">
+            <button class="chosen" data-color="#1c2933" style="--swatch:#1c2933" aria-label="Black" aria-pressed="true"><svg class="icon"><use href="#i-check"/></svg></button>
+            <button data-color="#d94444" style="--swatch:#d94444" aria-label="Red" aria-pressed="false"><svg class="icon"><use href="#i-check"/></svg></button>
+            <button data-color="#236cbd" style="--swatch:#236cbd" aria-label="Blue" aria-pressed="false"><svg class="icon"><use href="#i-check"/></svg></button>
+            <button data-color="#249363" style="--swatch:#249363" aria-label="Green" aria-pressed="false"><svg class="icon"><use href="#i-check"/></svg></button>
+          </div>
+          <details class="board-actions"><summary>Board &amp; files</summary>
+            <button class="tool-button" id="save"><svg class="icon"><use href="#i-save"/></svg><span>Save on this device</span></button>
+            <button class="tool-button" id="load"><svg class="icon"><use href="#i-folder"/></svg><span>Load saved board</span></button>
+            <button class="tool-button" id="import"><svg class="icon"><use href="#i-upload"/></svg><span>Import board file</span></button>
+            <button class="tool-button" id="png"><svg class="icon"><use href="#i-image"/></svg><span>Export PNG image</span></button>
+            <button class="tool-button" id="json"><svg class="icon"><use href="#i-download"/></svg><span>Export board file</span></button>
+            <button class="tool-button danger" id="new"><svg class="icon"><use href="#i-trash"/></svg><span>Clear board</span></button>
+            <p class="storage-hint">Saved boards stay in this browser. Export a board file to back up or move your drill.</p>
+          </details>
+          <input id="file" type="file" accept=".json,application/json" hidden>
+        </div>
+      </aside>
+      <main class="workspace" id="workspace">
+        <div class="workspace-heading">
+          <div class="title-row"><input class="title-input" id="title" type="text" maxlength="80" value="New hockey drill" aria-label="Drill title"><span class="view-label" id="view-label">FULL RINK</span></div>
+          <div class="board-toolbar">
+            <button class="active-tool" id="active-tool" aria-label="Choose drawing tool" aria-controls="drawing-menu" aria-expanded="true"><svg class="icon"><use id="active-icon" href="#i-select"/></svg><span id="active-label">Select &amp; move</span><svg class="icon chevron"><use href="#i-chevron"/></svg></button>
+            <label id="label-control" hidden><span class="sr-only" id="label-caption">Player label</span><input class="label-input" id="object-label" type="text" maxlength="5" value="F1" aria-label="Player label"></label>
+            <span class="tool-hint" id="tool-hint">Tap an object, then drag it into position.</span>
+            <div class="history-actions"><button class="icon-button" id="undo" aria-label="Undo" title="Undo" disabled><svg class="icon"><use href="#i-undo"/></svg></button><button class="icon-button" id="redo" aria-label="Redo" title="Redo" disabled><svg class="icon"><use href="#i-redo"/></svg></button></div>
+          </div>
+          <div class="mobile-context" id="mobile-context" hidden>
+            <div class="subtools" id="subtools" aria-label="Tool options"></div>
+            <div class="quick-colours" aria-label="Drawing colour">
+              <button data-color="#1c2933" style="--swatch:#1c2933" class="chosen" aria-label="Black" aria-pressed="true"></button>
+              <button data-color="#d94444" style="--swatch:#d94444" aria-label="Red" aria-pressed="false"></button>
+              <button data-color="#236cbd" style="--swatch:#236cbd" aria-label="Blue" aria-pressed="false"></button>
+              <button data-color="#249363" style="--swatch:#249363" aria-label="Green" aria-pressed="false"></button>
+            </div>
+          </div>
+        </div>
+        <div class="board-stage" id="board-stage">
+          <svg class="board-canvas" id="board" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 465 1040" width="465" height="1040" aria-label="Interactive portrait hockey rink whiteboard" tabindex="0" data-tool="select"><g id="rinkLayer"></g><g id="drawLayer"></g><g id="previewLayer" pointer-events="none"></g></svg>
+        </div>
+        <footer class="workspace-footer"><div id="status" role="status" aria-live="polite">Choose a tool from the menu to start your drill.</div><span class="saved-indicator" id="save-state">On this device</span></footer>
+      </main>
+    </div>
+  </div>
+  <nav class="mobile-tools" id="mobile-tools" aria-label="Drawing tools">
+    <span class="mobile-indicator" aria-hidden="true"></span>
+    <button class="mobile-tool active" data-group="move" aria-label="Move tool" aria-pressed="true"><svg class="icon"><use href="#i-select"/></svg><span>Move</span></button>
+    <button class="mobile-tool" data-group="draw" aria-label="Draw tools" aria-pressed="false"><svg class="icon"><use href="#i-pen"/></svg><span>Draw</span></button>
+    <button class="mobile-tool" data-group="routes" aria-label="Route tools" aria-pressed="false"><svg class="icon"><use href="#i-skate"/></svg><span>Routes</span></button>
+    <button class="mobile-tool" data-group="players" aria-label="Player tool" aria-pressed="false"><svg class="icon"><use href="#i-player"/></svg><span>Players</span></button>
+    <button class="mobile-tool" data-group="objects" aria-label="Object tools" aria-pressed="false"><svg class="icon"><use href="#i-puck"/></svg><span>Objects</span></button>
+    <button class="mobile-tool" data-group="erase" aria-label="Erase tool" aria-pressed="false"><svg class="icon"><use href="#i-erase"/></svg><span>Erase</span></button>
+  </nav>
+  <button class="backdrop" id="menu-backdrop" aria-label="Close drawing menu" tabindex="-1" hidden></button>
+  <script>
+'use strict';
+const NS = 'http://www.w3.org/2000/svg';
+const $ = id => document.getElementById(id);
+const board = $('board'), rinkLayer = $('rinkLayer'), drawLayer = $('drawLayer'), previewLayer = $('previewLayer');
+const STORAGE_KEY = 'hockey-whiteboard';
+const TOOL = {
+  select:{name:'Select & move',hint:'Tap an object, then drag it into position.'},
+  pen:{name:'Freehand',hint:'Draw freely with your finger, mouse or stylus.'},
+  skate:{name:'Skating route',hint:'Drag from the starting point to the destination.'},
+  pass:{name:'Pass',hint:'Drag to draw a dashed passing arrow.'},
+  shot:{name:'Shot',hint:'Drag to draw a double-line shooting arrow.'},
+  player:{name:'Player',hint:'Set a label, then tap the rink to place a player.'},
+  puck:{name:'Puck',hint:'Tap the rink to place a puck.'},
+  cone:{name:'Cone',hint:'Tap the rink to place a cone.'},
+  text:{name:'Text',hint:'Enter a note, then tap the rink to place it.'},
+  erase:{name:'Eraser',hint:'Tap an object to remove it. Undo brings it back.'}
+};
+let tool = 'select', color = '#1c2933', items = [], history = [], future = [], gesture = null, selected = -1;
+let rinkMode = 'full', view = {width:465,height:1040}, menuOpen = false;
+let playerLabel = 'F1', textLabel = 'Note';
+const mobile = window.matchMedia('(max-width:760px)');
+const GROUPS = {move:['select'],draw:['pen','text'],routes:['skate','pass','shot'],players:['player'],objects:['puck','cone'],erase:['erase']};
+const groupChoice = {move:'select',draw:'pen',routes:'skate',players:'player',objects:'puck',erase:'erase'};
+const toolGroup = name => Object.keys(GROUPS).find(group => GROUPS[group].includes(name));
+const el = (tag, attrs = {}) => { const node = document.createElementNS(NS, tag); Object.entries(attrs).forEach(([key,value]) => node.setAttribute(key,String(value))); return node; };
+const say = message => { $('status').textContent = message; };
+const markDirty = () => { $('save-state').textContent = 'Unsaved changes'; };
+const copy = value => JSON.parse(JSON.stringify(value));
+
+// Hockey Canada rink proportions: 200 × 85 ft, drawn at 5 SVG units per foot.
+// Rule 1.3: goal lines 11 ft from the ends; blue lines 64 ft from the goal lines.
+function renderRink(rinkLayer, mode = 'full') {
+  rinkLayer.replaceChildren();
+  const half = mode === 'half';
+  const view = { width: 465, height: half ? 540 : 1040 };
+  if (mode === 'blank') {
+    rinkLayer.append(el('rect', { width:465, height:1040, rx:10, fill:'#fff' }));
+    return view;
+  }
+  const red = '#d74450', blue = '#3979b8', board = '#253b51';
+  const clipId = 'hockey-rink-ice-clip';
+  const topHalf = 'M20 520 V160 A140 140 0 0 1 160 20 H305 A140 140 0 0 1 445 160 V520';
+  const iceShape = () => half
+    ? el('path', { d: topHalf + ' Z' })
+    : el('rect', { x: 20, y: 20, width: 425, height: 1000, rx: 140 });
+  const defs = el('defs');
+  const clip = el('clipPath', { id: clipId });
+  clip.append(iceShape());
+  defs.append(clip);
+  rinkLayer.append(defs);
+  const ice = iceShape();
+  ice.setAttribute('fill', '#fff');
+  rinkLayer.append(ice);
+
+  const marks = el('g', { 'clip-path': `url(#${clipId})` });
+  rinkLayer.append(marks);
+  const add = (tag, attrs, parent = marks) => {
+    const item = el(tag, attrs);
+    parent.append(item);
+    return item;
+  };
+  const line = (x1, y1, x2, y2, color, width = 1.1, parent = marks) =>
+    add('line', { x1, y1, x2, y2, stroke: color, 'stroke-width': width }, parent);
+
+  if (mode !== 'blank') {
+    // The neutral zone is 50 ft long. All transverse lines stop at the boards.
+    [395, 645].forEach(y => line(20, y, 445, y, blue, 5));
+    line(20, 520, 445, 520, red, 5);
+    // Small white interruptions make the red centre line easy to distinguish.
+    for (let x = 25; x < 445; x += 18) {
+      line(x, 520, x + 7, 520, '#fff', 1.5);
+    }
+    [75, 965].forEach(y => line(20, y, 445, y, red));
+
+    add('circle', { cx: 232.5, cy: 520, r: 75, fill: 'none', stroke: blue, 'stroke-width': 1.2 });
+    add('circle', { cx: 232.5, cy: 520, r: 2.5, fill: blue });
+
+    function faceoff(cx, cy) {
+      add('circle', { cx, cy, r: 75, fill: 'none', stroke: red, 'stroke-width': 1.1 });
+      add('circle', { cx, cy, r: 5, fill: red });
+      // Two-foot hash marks outside each faceoff circle, three feet apart.
+      for (const dy of [-7.5, 7.5]) {
+        line(cx - 85, cy + dy, cx - 75, cy + dy, red);
+        line(cx + 75, cy + dy, cx + 85, cy + dy, red);
+      }
+      // Faceoff player positioning marks, simplified for a coaching whiteboard.
+      for (const sx of [-1, 1]) {
+        for (const sy of [-1, 1]) {
+          add('path', {
+            d: `M${cx + sx * 10} ${cy + sy * 17.5} V${cy + sy * 5} H${cx + sx * 24}`,
+            fill: 'none', stroke: red, 'stroke-width': 1.1
+          });
+        }
+      }
+    }
+    for (const y of [175, 865]) {
+      for (const x of [122.5, 342.5]) faceoff(x, y);
+    }
+    for (const y of [420, 620]) {
+      for (const x of [122.5, 342.5]) add('circle', { cx: x, cy: y, r: 5, fill: red });
+    }
+
+    function goal(y, rotation, id) {
+      const group = add('g', { transform: `translate(232.5 ${y}) rotate(${rotation})` });
+      // A six-foot-radius crease opens toward centre ice, in front of the net.
+      add('path', {
+        d: 'M-30 0 A30 30 0 0 0 30 0 Z', fill: '#d7edf8',
+        stroke: red, 'stroke-width': 1.1
+      }, group);
+
+      // Top-down goal: six-foot mouth on the goal line, 44-inch depth behind it.
+      // A gently rounded rear frame and fine mesh distinguish it from a box.
+      const netPath = 'M-15 0 L-18 -10 Q-18 -18.333 -10 -18.333 H10 Q18 -18.333 18 -10 L15 0 Z';
+      const netClip = el('clipPath', { id });
+      netClip.append(el('path', { d: netPath }));
+      defs.append(netClip);
+      add('path', { d: netPath, fill: '#f8fafc' }, group);
+      const mesh = add('g', { 'clip-path': `url(#${id})`, stroke: '#9faebc', 'stroke-width': .55 }, group);
+      for (let x = -40; x <= 40; x += 4) {
+        line(x, -22, x + 25, 3, '#9faebc', .55, mesh);
+        line(x, -22, x - 25, 3, '#9faebc', .55, mesh);
+      }
+      add('path', {
+        d: netPath, fill: 'none', stroke: red, 'stroke-width': 1.8,
+        'stroke-linejoin': 'round', 'stroke-linecap': 'round'
+      }, group);
+      // The straight front frame and its two posts sit directly on the goal line.
+      line(-15, 0, 15, 0, red, 2, group);
+      for (const x of [-15, 15]) add('circle', { cx: x, cy: 0, r: 1.5, fill: red }, group);
+    }
+    goal(75, 0, 'hockey-rink-top-net-clip');
+    if (!half) goal(965, 180, 'hockey-rink-bottom-net-clip');
+  }
+
+  // Half-rink boards terminate at centre ice; the open edge is not a new end wall.
+  const outline = half
+    ? el('path', { d: topHalf })
+    : el('rect', { x: 20, y: 20, width: 425, height: 1000, rx: 140 });
+  outline.setAttribute('fill', 'none');
+  outline.setAttribute('stroke', board);
+  outline.setAttribute('stroke-width', '3');
+  outline.setAttribute('stroke-linecap', 'round');
+  rinkLayer.append(outline);
+  return view;
+}
+
+
+function fitBoard() {
+  const stage = $('board-stage'), style = getComputedStyle(stage);
+  const width = stage.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+  const height = stage.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom);
+  const scale = Math.max(.05, Math.min(width / view.width, height / view.height));
+  board.style.width = (view.width * scale) + 'px';
+  board.style.height = (view.height * scale) + 'px';
+  positionToolIndicator();
+}
+function positionToolIndicator() {
+  const active = $('mobile-tools').querySelector('.active');
+  if (active) $('mobile-tools').style.setProperty('--nav-x',(active.offsetLeft + active.offsetWidth/2 - 22) + 'px');
+}
+function syncMobileTools() {
+  const group = toolGroup(tool); groupChoice[group] = tool;
+  document.querySelectorAll('[data-group]').forEach(button => {
+    const active = button.dataset.group === group;
+    button.classList.toggle('active',active); button.setAttribute('aria-pressed',String(active));
+  });
+  $('mobile-context').hidden = !mobile.matches || ['move','erase'].includes(group);
+  $('subtools').replaceChildren();
+  if (GROUPS[group].length > 1) GROUPS[group].forEach(name => {
+    const button = document.createElement('button');
+    button.textContent = name === 'skate' ? 'Skate' : TOOL[name].name;
+    button.dataset.quickTool = name; button.classList.toggle('active',name === tool);
+    button.setAttribute('aria-pressed',String(name === tool));
+    button.addEventListener('click',() => chooseTool(name)); $('subtools').append(button);
+  });
+  positionToolIndicator();
+}
+function rink() {
+  view = renderRink(rinkLayer, rinkMode);
+  board.setAttribute('viewBox', `0 0 ${view.width} ${view.height}`);
+  board.setAttribute('width', view.width); board.setAttribute('height', view.height);
+  $('rink').value = rinkMode;
+  $('view-label').textContent = {full:'FULL RINK',half:'HALF RINK',blank:'BLANK BOARD'}[rinkMode];
+  fitBoard();
+}
+function setMenu(open, restoreFocus = true) {
+  menuOpen = open;
+  $('app').classList.toggle('menu-hidden', !open);
+  $('app').classList.toggle('menu-open', open);
+  $('drawing-menu').inert = !open;
+  $('drawing-menu').setAttribute('aria-hidden', String(!open));
+  $('menu-toggle').setAttribute('aria-expanded', String(open));
+  $('active-tool').setAttribute('aria-expanded', String(open));
+  $('menu-backdrop').hidden = !(open && mobile.matches);
+  $('workspace').inert = open && mobile.matches;
+  $('app-header').inert = open && mobile.matches;
+  $('mobile-tools').inert = open && mobile.matches;
+  if (open && mobile.matches) {
+    $('drawing-menu').setAttribute('role','dialog');
+    $('drawing-menu').setAttribute('aria-modal','true');
+    $('drawing-menu').setAttribute('aria-labelledby','menu-title');
+    $('menu-close').focus();
+  } else {
+    $('drawing-menu').removeAttribute('role');
+    $('drawing-menu').removeAttribute('aria-modal');
+    if (!open && restoreFocus) $('menu-toggle').focus();
+  }
+  requestAnimationFrame(fitBoard);
+}
+function closeMobileMenu() { if (mobile.matches && menuOpen) setMenu(false); }
+function chooseTool(next) {
+  cancelGesture(); tool = next; selected = -1;
+  document.querySelectorAll('[data-tool].tool-button').forEach(button => {
+    const active = button.dataset.tool === tool;
+    button.classList.toggle('active', active); button.setAttribute('aria-pressed',String(active));
+  });
+  board.dataset.tool = tool;
+  $('active-label').textContent = TOOL[tool].name;
+  $('active-icon').setAttribute('href','#i-' + tool);
+  $('tool-hint').textContent = TOOL[tool].hint;
+  const hasLabel = tool === 'player' || tool === 'text';
+  $('label-control').hidden = !hasLabel;
+  if (hasLabel) {
+    $('object-label').value = tool === 'player' ? playerLabel : textLabel;
+    $('object-label').maxLength = tool === 'player' ? 5 : 80;
+    $('object-label').setAttribute('aria-label',tool === 'player' ? 'Player label' : 'Text to place');
+    $('label-caption').textContent = tool === 'player' ? 'Player label' : 'Text to place';
+  }
+  syncMobileTools(); say(TOOL[tool].hint); render(); closeMobileMenu();
+}
+function data() { return {version:2,orientation:'portrait',title:$('title').value,rink:rinkMode,items:copy(items)}; }
+function capture() { return JSON.stringify(data()); }
+function snapshot(previous = capture()) { history.push(previous); if (history.length > 70) history.shift(); future = []; updateHistory(); }
+function updateHistory() { $('undo').disabled = !history.length; $('redo').disabled = !future.length; }
+function applyState(state, restoreTitle = true) { items = state.items; rinkMode = state.rink; if (restoreTitle) $('title').value = state.title; selected = -1; rink(); render(); }
+function undo() { cancelGesture(); if (!history.length) return; future.push(capture()); applyState(JSON.parse(history.pop()),false); updateHistory(); markDirty(); say('Last change undone.'); }
+function redo() { cancelGesture(); if (!future.length) return; history.push(capture()); applyState(JSON.parse(future.pop()),false); updateHistory(); markDirty(); say('Change restored.'); }
+
+function itemGraphic(item, index, preview = false) {
+  const group = el('g', preview ? {} : {'data-index':index,'data-type':item.type,'aria-label':TOOL[item.type].name + (item.label ? ' ' + item.label : '')});
+  const points = item.pts || [], stroke = item.color;
+  if (item.type === 'pen') {
+    const line = points.map(point => point.join(',')).join(' ');
+    group.append(el('polyline',{points:line,fill:'none',stroke:stroke,'stroke-width':3.2,'stroke-linecap':'round','stroke-linejoin':'round'}));
+    if (!preview) group.append(el('polyline',{points:line,fill:'none',stroke:'transparent','stroke-width':15,'pointer-events':'stroke'}));
+  } else if (['skate','pass','shot'].includes(item.type)) {
+    const [start,end] = points, dx = end[0]-start[0], dy = end[1]-start[1], length = Math.hypot(dx,dy), angle = Math.atan2(dy,dx)*180/Math.PI;
+    const path = `M${start.join(' ')} L${end.join(' ')}`;
+    if (item.type === 'shot' && length > 0) {
+      const offsetX = -dy/length*2.2, offsetY = dx/length*2.2, tipX = end[0]-dx/length*7, tipY = end[1]-dy/length*7;
+      [-1,1].forEach(side => group.append(el('path',{d:`M${start[0]+offsetX*side} ${start[1]+offsetY*side} L${tipX+offsetX*side} ${tipY+offsetY*side}`,fill:'none',stroke,'stroke-width':2.2,'stroke-linecap':'round'})));
+    } else group.append(el('path',{d:path,fill:'none',stroke,'stroke-width':3,'stroke-linecap':'round','stroke-dasharray':item.type === 'pass' ? '9 7' : ''}));
+    group.append(el('path',{d:'M-11 -6 L0 0 L-11 6',fill:'none',stroke,'stroke-width':3,'stroke-linecap':'round','stroke-linejoin':'round',transform:`translate(${end.join(' ')}) rotate(${angle})`}));
+    if (!preview) group.append(el('path',{d:path,fill:'none',stroke:'transparent','stroke-width':15,'pointer-events':'stroke'}));
+  } else if (item.type === 'player') {
+    group.append(el('circle',{cx:item.x,cy:item.y,r:14,fill:stroke,stroke:'#fff','stroke-width':2}));
+    const label = el('text',{x:item.x,y:item.y+.5,'text-anchor':'middle','dominant-baseline':'central',fill:'#fff','font-size':item.label.length > 3 ? 8.5 : 11,'font-weight':700,'font-family':'Arial,sans-serif'});
+    label.textContent = item.label || 'P'; group.append(label);
+    group.append(el('circle',{cx:item.x,cy:item.y,r:18,fill:'transparent'}));
+  } else if (item.type === 'puck') {
+    group.append(el('circle',{cx:item.x,cy:item.y,r:5.5,fill:'#1f2528',stroke:'#fff','stroke-width':1}));
+    group.append(el('circle',{cx:item.x,cy:item.y,r:14,fill:'transparent'}));
+  } else if (item.type === 'cone') {
+    group.append(el('path',{d:`M${item.x} ${item.y-12} l-11 22 h22 Z`,fill:stroke,stroke:'#fff','stroke-width':1.3,'stroke-linejoin':'round'}));
+    group.append(el('path',{d:`M${item.x-6} ${item.y+1} h12`,stroke:'#ffffff9e','stroke-width':2}));
+    group.append(el('circle',{cx:item.x,cy:item.y,r:15,fill:'transparent'}));
+  } else if (item.type === 'text') {
+    const text = el('text',{x:item.x,y:item.y,fill:stroke,'font-size':18,'font-weight':600,'font-family':'Arial,sans-serif'}); text.textContent = item.label; group.append(text);
+  }
+  return group;
+}
+function render() {
+  drawLayer.replaceChildren();
+  items.forEach((item,index) => {
+    const group = itemGraphic(item,index); drawLayer.append(group);
+    if (selected === index) {
+      const box = group.getBBox();
+      group.prepend(el('rect',{x:box.x-4,y:box.y-4,width:box.width+8,height:box.height+8,rx:5,class:'selection-outline','data-selection':'true'}));
+    }
+  });
+}
+function pointerPoint(event) {
+  const matrix = board.getScreenCTM(); if (!matrix) return [0,0];
+  const point = board.createSVGPoint(); point.x = event.clientX; point.y = event.clientY;
+  const transformed = point.matrixTransform(matrix.inverse());
+  return [Math.max(0,Math.min(view.width,transformed.x)),Math.max(0,Math.min(view.height,transformed.y))];
+}
+function hit(event) { const group = event.target.closest('[data-index]'); return group && drawLayer.contains(group) ? Number(group.dataset.index) : -1; }
+function cancelGesture() {
+  if (gesture?.kind === 'move') { items[gesture.index] = gesture.original; render(); }
+  gesture = null; previewLayer.replaceChildren();
+}
+function down(event) {
+  if (!event.isPrimary || event.button !== 0 || gesture) return;
+  event.preventDefault(); board.focus({preventScroll:true});
+  const point = pointerPoint(event), index = hit(event);
+  board.setPointerCapture(event.pointerId);
+  if (tool === 'erase') {
+    if (index >= 0) { snapshot(); items.splice(index,1); selected = -1; render(); markDirty(); say('Object erased.'); } return;
+  }
+  if (tool === 'select') {
+    selected = index; render();
+    if (index >= 0) gesture = {kind:'move',pointerId:event.pointerId,index,start:point,original:copy(items[index]),before:capture(),moved:false};
+    return;
+  }
+  selected = -1;
+  if (['player','puck','cone','text'].includes(tool)) {
+    const label = tool === 'player' ? ($('object-label').value.trim() || 'P').slice(0,5) : tool === 'text' ? $('object-label').value.trim().slice(0,80) : '';
+    if (tool === 'text' && !label) { say('Enter the text you want to place.'); $('object-label').focus(); return; }
+    snapshot(); items.push({type:tool,x:point[0],y:point[1],color,label}); render(); markDirty(); return;
+  }
+  gesture = {kind:'draw',pointerId:event.pointerId,type:tool,pts:[point,point],color};
+}
+function move(event) {
+  if (!gesture || event.pointerId !== gesture.pointerId) return;
+  const point = pointerPoint(event);
+  if (gesture.kind === 'move') {
+    const original = gesture.original, positions = original.pts || [[original.x,original.y]];
+    const bounds = positions.reduce((b,p) => ({minX:Math.min(b.minX,p[0]),maxX:Math.max(b.maxX,p[0]),minY:Math.min(b.minY,p[1]),maxY:Math.max(b.maxY,p[1])}),{minX:Infinity,maxX:-Infinity,minY:Infinity,maxY:-Infinity});
+    const dx = Math.max(-bounds.minX,Math.min(465-bounds.maxX,point[0]-gesture.start[0]));
+    const dy = Math.max(-bounds.minY,Math.min(1040-bounds.maxY,point[1]-gesture.start[1]));
+    if (Math.abs(dx)+Math.abs(dy) > .5) gesture.moved = true;
+    const item = items[gesture.index];
+    if (original.pts) item.pts = original.pts.map(p => [p[0]+dx,p[1]+dy]);
+    else { item.x = original.x+dx; item.y = original.y+dy; }
+    render();
+  } else {
+    if (gesture.type === 'pen') {
+      const previous = gesture.pts[gesture.pts.length-1];
+      if (Math.hypot(point[0]-previous[0],point[1]-previous[1]) > .45) gesture.pts.push(point);
+    } else gesture.pts[1] = point;
+    previewLayer.replaceChildren(itemGraphic(gesture,-1,true));
+  }
+}
+function up(event) {
+  if (!gesture || event.pointerId !== gesture.pointerId) return;
+  if (gesture.kind === 'draw') {
+    const first = gesture.pts[0], last = gesture.pts[gesture.pts.length-1];
+    if (gesture.type === 'pen' || Math.hypot(last[0]-first[0],last[1]-first[1]) > 2) {
+      snapshot(); items.push({type:gesture.type,pts:copy(gesture.pts),color:gesture.color}); markDirty();
+    }
+  } else if (gesture.moved) { snapshot(gesture.before); markDirty(); }
+  gesture = null; previewLayer.replaceChildren(); render();
+}
+
+// Old boards used a 1000 x 520 landscape space. Rotate their positions clockwise
+// and map the previous ice bounds onto the portrait ice exactly once.
+function normalizeBoard(input) {
+  if (!input || !Array.isArray(input.items) || input.items.length > 5000) throw Error('Invalid board');
+  if (input.version !== undefined && input.version !== 1 && input.version !== 2) throw Error('Unsupported board version');
+  const legacy = input.version !== 2;
+  let pointCount = 0;
+  function point(value) {
+    if (!Array.isArray(value) || value.length !== 2 || !value.every(v => typeof v === 'number' && Number.isFinite(v) && Math.abs(v) < 1000000)) throw Error('Invalid coordinates');
+    let [x,y] = value;
+    if (legacy) [x,y] = [445-(y-20)*425/480,20+(x-20)*(input.rink === 'half' ? 500 : 1000)/960];
+    return [Math.max(0,Math.min(465,x)),Math.max(0,Math.min(1040,y))];
+  }
+  const next = input.items.map(item => {
+    if (!item || !['pen','skate','pass','shot','player','puck','cone','text'].includes(item.type)) throw Error('Unknown drawing tool');
+    const color = typeof item.color === 'string' && /^#[0-9a-f]{6}$/i.test(item.color) ? item.color : '#1c2933';
+    if (['pen','skate','pass','shot'].includes(item.type)) {
+      if (!Array.isArray(item.pts) || item.pts.length < 2 || (item.type !== 'pen' && item.pts.length !== 2)) throw Error('Invalid stroke');
+      pointCount += item.pts.length; if (pointCount > 100000) throw Error('Board is too large');
+      return {type:item.type,color,pts:item.pts.map(point)};
+    }
+    const [x,y] = point([item.x,item.y]);
+    return {type:item.type,x,y,color,label:String(item.label || (item.type === 'player' ? 'P' : '')).slice(0,item.type === 'player' ? 5 : 80)};
+  });
+  return {version:2,orientation:'portrait',title:String(input.title || 'Hockey drill').slice(0,80),rink:['full','half','blank'].includes(input.rink) ? input.rink : 'full',items:next,legacy};
+}
+function restore(input) {
+  cancelGesture(); const next = normalizeBoard(input); snapshot(); applyState(next); markDirty();
+  say(next.legacy ? 'Board loaded. Your earlier drawing has been rotated to portrait.' : 'Board loaded.');
+  closeMobileMenu();
+}
+function saveBoard() {
+  cancelGesture();
+  try { localStorage.setItem(STORAGE_KEY,JSON.stringify(data())); $('save-state').textContent = 'Saved on this device'; say('Board saved in this browser.'); }
+  catch { say('Browser storage is unavailable. Use Export board file to save your drill.'); }
+  closeMobileMenu();
+}
+function loadBoard() {
+  try { const saved = localStorage.getItem(STORAGE_KEY); if (!saved) { say('No saved board found in this browser.'); closeMobileMenu(); return; } restore(JSON.parse(saved)); }
+  catch { say('Unable to load the saved board. You can import an exported board file.'); closeMobileMenu(); }
+}
+function download(blob,name) {
+  const link = document.createElement('a'), url = URL.createObjectURL(blob);
+  link.href = url; link.download = name; document.body.append(link); link.click(); link.remove();
+  setTimeout(() => URL.revokeObjectURL(url),10000);
+}
+function exportPNG() {
+  cancelGesture();
+  const clone = board.cloneNode(true);
+  clone.querySelectorAll('[data-selection]').forEach(node => node.remove());
+  clone.querySelector('#previewLayer').replaceChildren();
+  clone.removeAttribute('style'); clone.setAttribute('xmlns',NS);
+  clone.setAttribute('width',view.width); clone.setAttribute('height',view.height);
+  const width = view.width*3, height = view.height*3;
+  const image = new Image(), url = URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(clone)],{type:'image/svg+xml'}));
+  image.onload = () => {
+    const canvas = document.createElement('canvas'); canvas.width = width; canvas.height = height;
+    const context = canvas.getContext('2d');
+    if (!context) { URL.revokeObjectURL(url); say('Image export is unavailable in this browser.'); return; }
+    context.fillStyle = '#fff'; context.fillRect(0,0,width,height); context.drawImage(image,0,0,width,height);
+    canvas.toBlob(blob => { URL.revokeObjectURL(url); if (blob) { download(blob,'hockey-drill.png'); say('Rink exported as a PNG image.'); } else say('PNG export failed. Please try again.'); },'image/png');
+  };
+  image.onerror = () => { URL.revokeObjectURL(url); say('PNG export failed. Please try again.'); };
+  image.src = url; closeMobileMenu();
+}
+
+board.addEventListener('pointerdown',down); board.addEventListener('pointermove',move); board.addEventListener('pointerup',up);
+board.addEventListener('pointercancel',cancelGesture); board.addEventListener('lostpointercapture',() => { if (gesture) cancelGesture(); });
+board.addEventListener('dblclick',event => {
+  const index = hit(event); if (index < 0 || !['text','player'].includes(items[index].type) || tool !== 'select') return;
+  const value = prompt(items[index].type === 'player' ? 'Player label' : 'Edit text',items[index].label);
+  if (value === null || !value.trim()) return;
+  snapshot(); items[index].label = value.trim().slice(0,items[index].type === 'player' ? 5 : 80); render(); markDirty();
+});
+document.querySelectorAll('.tool-button[data-tool]').forEach(button => button.addEventListener('click',() => chooseTool(button.dataset.tool)));
+document.querySelectorAll('[data-color]').forEach(button => button.addEventListener('click',() => {
+  color = button.dataset.color;
+  document.querySelectorAll('[data-color]').forEach(other => { const active = other.dataset.color === color; other.classList.toggle('chosen',active); other.setAttribute('aria-pressed',String(active)); });
+  say(button.getAttribute('aria-label') + ' selected for new drawings.');
+}));
+$('object-label').addEventListener('input',() => { if (tool === 'player') playerLabel = $('object-label').value; else textLabel = $('object-label').value; });
+$('title').addEventListener('input',markDirty);
+$('rink').addEventListener('change',() => { cancelGesture(); snapshot(); rinkMode = $('rink').value; rink(); markDirty(); say(rinkMode === 'half' ? 'Showing the top half. Full rink shows all your drawings.' : 'Rink view changed.'); closeMobileMenu(); });
+$('menu-toggle').addEventListener('click',() => setMenu(!menuOpen));
+$('active-tool').addEventListener('click',() => setMenu(true));
+$('menu-close').addEventListener('click',() => setMenu(false));
+$('menu-backdrop').addEventListener('click',() => setMenu(false));
+mobile.addEventListener('change',() => { setMenu(!mobile.matches,false); syncMobileTools(); });
+document.querySelectorAll('[data-group]').forEach(button => button.addEventListener('click',() => chooseTool(groupChoice[button.dataset.group])));
+$('undo').addEventListener('click',undo); $('redo').addEventListener('click',redo);
+$('save').addEventListener('click',saveBoard); $('quick-save').addEventListener('click',saveBoard); $('load').addEventListener('click',loadBoard);
+$('new').addEventListener('click',() => {
+  if (!items.length) { say('The board is already clear.'); closeMobileMenu(); return; }
+  if (!confirm('Clear the drawings on this board? You can undo this.')) return;
+  cancelGesture(); snapshot(); items = []; selected = -1; render(); markDirty(); say('Board cleared. Use Undo to bring the drawings back.'); closeMobileMenu();
+});
+$('import').addEventListener('click',() => $('file').click());
+$('file').addEventListener('change',async event => {
+  const file = event.target.files[0]; if (!file) return;
+  try { if (file.size > 5000000) throw Error('File too large'); restore(JSON.parse(await file.text())); }
+  catch { say('Unable to open this board file. Choose a valid exported hockey board (.json).'); closeMobileMenu(); }
+  event.target.value = '';
+});
+$('json').addEventListener('click',() => { cancelGesture(); download(new Blob([JSON.stringify(data(),null,2)],{type:'application/json'}),'hockey-drill.json'); say('Board file exported.'); closeMobileMenu(); });
+$('png').addEventListener('click',exportPNG);
+document.addEventListener('keydown',event => {
+  if (menuOpen && mobile.matches) {
+    if (event.key === 'Escape') { event.preventDefault(); setMenu(false); return; }
+    if (event.key === 'Tab') {
+      const focusable = [...$('drawing-menu').querySelectorAll('button,input,select,summary,[tabindex="0"]')].filter(node => !node.disabled && node.getClientRects().length);
+      const first = focusable[0], last = focusable[focusable.length-1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    }
+    return;
+  }
+  if (event.target.matches('input,textarea,select,[contenteditable=true]')) return;
+  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z') { event.preventDefault(); event.shiftKey ? redo() : undo(); }
+  if (event.key === 'Escape') { cancelGesture(); selected = -1; render(); }
+  if ((event.key === 'Delete' || event.key === 'Backspace') && selected >= 0) { event.preventDefault(); snapshot(); items.splice(selected,1); selected = -1; render(); markDirty(); }
+});
+new ResizeObserver(fitBoard).observe($('board-stage'));
+setMenu(!mobile.matches,false); syncMobileTools(); rink(); render(); updateHistory();
+
+</script>
+</body>
+</html>
