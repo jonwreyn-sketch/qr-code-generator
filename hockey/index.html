@@ -110,7 +110,7 @@
           <div class="title-row"><input class="title-input" id="title" type="text" maxlength="80" value="New hockey drill" aria-label="Drill title"><select class="view-select" id="rink" aria-label="Board type"><option value="full">Full rink</option><option value="half">Half rink</option><option value="blank">Blank board</option></select></div>
           <div class="board-toolbar">
             <button class="active-tool" id="active-tool" aria-label="Choose drawing tool" aria-controls="drawing-menu" aria-expanded="true"><svg class="icon"><use id="active-icon" href="#i-select"/></svg><span id="active-label">Select &amp; move</span><svg class="icon chevron"><use href="#i-chevron"/></svg></button>
-            <label id="label-control" hidden><span class="sr-only" id="label-caption">Player label</span><input class="label-input" id="object-label" type="text" maxlength="5" value="F1" aria-label="Player label"></label>
+            <label id="label-control" hidden><span class="sr-only" id="label-caption">Player label</span><input class="label-input" id="object-label" type="text" maxlength="5" value="" aria-label="Player label"></label>
             <span class="tool-hint" id="tool-hint">Tap an object, then drag it into position.</span>
             <div class="history-actions"><button class="icon-button" id="undo" aria-label="Undo" title="Undo" disabled><svg class="icon"><use href="#i-undo"/></svg></button><button class="icon-button" id="redo" aria-label="Redo" title="Redo" disabled><svg class="icon"><use href="#i-redo"/></svg></button></div>
           </div>
@@ -161,7 +161,7 @@ const TOOL = {
 };
 let tool = 'select', color = '#1c2933', items = [], history = [], future = [], gesture = null, selected = -1;
 let rinkMode = 'full', orientation = 'portrait', canonicalView = {width:465,height:886}, view = {width:465,height:886}, menuOpen = false;
-let playerLabel = 'F1', textLabel = 'Note';
+let playerLabel = '', textLabel = 'Note';
 const mobile = window.matchMedia('(max-width:760px)');
 const GROUPS = {move:['select'],draw:['pen','text'],routes:['skate','pass','shot'],players:['player'],objects:['puck','cone'],erase:['erase']};
 const groupChoice = {move:'select',draw:'pen',routes:'skate',players:'player',objects:'puck',erase:'erase'};
@@ -417,7 +417,7 @@ function itemGraphic(item, index, preview = false) {
   } else if (item.type === 'player') {
     group.append(el('circle',{cx:item.x,cy:item.y,r:14,fill:stroke,stroke:'#fff','stroke-width':2}));
     const label = el('text',{x:item.x,y:item.y+.5,'text-anchor':'middle','dominant-baseline':'central',fill:'#fff','font-size':item.label.length > 3 ? 8.5 : 11,'font-weight':700,'font-family':'Arial,sans-serif'});
-    label.textContent = item.label || 'P'; group.append(label);
+    label.textContent = item.label || ''; group.append(label);
     group.append(el('circle',{cx:item.x,cy:item.y,r:18,fill:'transparent'}));
   } else if (item.type === 'puck') {
     group.append(el('circle',{cx:item.x,cy:item.y,r:5.5,fill:'#1f2528',stroke:'#fff','stroke-width':1}));
@@ -469,7 +469,7 @@ function down(event) {
   }
   selected = -1;
   if (['player','puck','cone','text'].includes(tool)) {
-    const label = tool === 'player' ? ($('object-label').value.trim() || 'P').slice(0,5) : tool === 'text' ? $('object-label').value.trim().slice(0,80) : '';
+    const label = tool === 'player' ? $('object-label').value.trim().slice(0,5) : tool === 'text' ? $('object-label').value.trim().slice(0,80) : '';
     if (tool === 'text' && !label) { say('Enter the text you want to place.'); $('object-label').focus(); return; }
     snapshot(); items.push({type:tool,x:point[0],y:point[1],color,label}); render(); markDirty(); return;
   }
@@ -575,7 +575,7 @@ function normalizeBoard(input) {
       return {type:item.type,color,pts:item.pts.map(point)};
     }
     const [x,y] = point([item.x,item.y]);
-    return {type:item.type,x,y,color,label:String(item.label || (item.type === 'player' ? 'P' : '')).slice(0,item.type === 'player' ? 5 : 80)};
+    return {type:item.type,x,y,color,label:String(item.label || '').slice(0,item.type === 'player' ? 5 : 80)};
   });
   return {
     version:10,
