@@ -19,7 +19,7 @@
     :root{color:#162a49;background:#f5f7fb;--muted:#627087;--border:#dfe5ef;--green:#233f68;--green-light:#edf2fb;--accent:#facc15}
     .brand-mark{background:#fff6cb;color:#263c5b}.tool-button{position:relative}.tool-button.active{background:#edf2fb;color:#162a49;border-color:transparent}.tool-button.active:before{content:"";position:absolute;left:-1px;top:8px;bottom:8px;width:3px;border-radius:3px;background:var(--accent)}.tool-dot{background:#dbb10b}.board-stage{background:#edf1f6;border-color:#e0e6ee}.title-input{color:#162a49}.view-label{color:#627087}.selection-outline{stroke:#315d96}.workspace-footer #status{color:#50627a}.mobile-tools,.mobile-context{display:none}
     @media(max-width:760px){
-      .app-shell{padding-bottom:calc(72px + env(safe-area-inset-bottom))}.workspace{padding-bottom:9px}.mobile-tools{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));position:fixed;inset:auto 0 0;height:calc(72px + env(safe-area-inset-bottom));padding:0 5px env(safe-area-inset-bottom);border-top:1px solid #e7ebf2;border-radius:18px 18px 0 0;background:#fff;box-shadow:0 -4px 22px #162a490b;z-index:10}.mobile-indicator{position:absolute;top:-12px;left:0;width:44px;height:44px;border-radius:50%;background:var(--accent);transform:translateX(var(--nav-x,0px));transition:transform .3s;pointer-events:none}.mobile-tool{position:relative;display:flex;align-items:center;justify-content:flex-start;flex-direction:column;gap:8px;padding:11px 0 9px;height:72px;border:0;background:transparent!important;color:#627087;min-width:0}.mobile-tool .icon{width:21px;height:21px;transition:transform .3s;color:#627087}.mobile-tool span{font-size:10px;line-height:1.2}.mobile-tool.active{color:#162a49;font-weight:700}.mobile-tool.active .icon{transform:translateY(-14px);color:#162a49}.mobile-context:not([hidden]){display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:7px;min-height:31px}.subtools{display:flex;gap:4px}.subtools button{font-size:11px;border:1px solid #dfe5ef;background:#fff;color:#53657c;padding:6px 8px;border-radius:7px}.subtools button.active{border-color:#dfc44e;background:#fff8d9;color:#162a49;font-weight:600}.quick-colours{display:flex;gap:8px;padding:0 3px}.quick-colours button{width:21px;height:21px;border:2px solid white;outline:1px solid #dfe5ef;border-radius:50%;padding:0;background:var(--swatch)!important}.quick-colours button.chosen{outline:2px solid #536b8d}
+      .app-shell{padding-bottom:calc(72px + env(safe-area-inset-bottom))}.workspace{padding-bottom:9px}.mobile-tools{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));position:fixed;inset:auto 0 0;height:calc(72px + env(safe-area-inset-bottom));padding:0 5px env(safe-area-inset-bottom);border-top:1px solid #e7ebf2;border-radius:18px 18px 0 0;background:#fff;box-shadow:0 -4px 22px #162a490b;z-index:10}.mobile-indicator{position:absolute;top:-12px;left:0;width:44px;height:44px;border-radius:50%;background:var(--accent);transform:translateX(var(--nav-x,0px));transition:transform .3s;pointer-events:none}.mobile-tool{position:relative;display:flex;align-items:center;justify-content:flex-start;flex-direction:column;gap:8px;padding:11px 0 9px;height:72px;border:0;background:transparent!important;color:#627087;min-width:0}.mobile-tool .icon{width:21px;height:21px;transition:transform .3s;color:#627087}.mobile-tool span{font-size:10px;line-height:1.2}.mobile-tool.active{color:#162a49;font-weight:700}.mobile-tool.active .icon{transform:translateY(-14px);color:#162a49}.mobile-context:not([hidden]){display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:7px;min-height:31px}.subtools{display:flex;gap:4px}.subtools button{font-size:11px;border:1px solid #dfe5ef;background:#fff;color:#53657c;padding:6px 8px;border-radius:7px}.subtools button.active{border-color:#dfc44e;background:#fff8d9;color:#162a49;font-weight:600}.subtools button.danger{color:#a5423e;border-color:#efd8d6;background:#fff7f6}.quick-colours{display:flex;gap:8px;padding:0 3px}.quick-colours button{width:21px;height:21px;border:2px solid white;outline:1px solid #dfe5ef;border-radius:50%;padding:0;background:var(--swatch)!important}.quick-colours button.chosen{outline:2px solid #536b8d}
     }
     @media(prefers-reduced-motion:reduce){.mobile-indicator,.mobile-tool .icon{transition:none}}
   </style>
@@ -122,7 +122,7 @@
           </div>
         </div>
         <div class="board-stage" id="board-stage">
-          <svg class="board-canvas" id="board" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 465 1040" width="465" height="1040" aria-label="Interactive portrait hockey rink whiteboard" tabindex="0" data-tool="select"><g id="rinkLayer"></g><g id="drawLayer"></g><g id="previewLayer" pointer-events="none"></g></svg>
+          <svg class="board-canvas" id="board" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 465 940" width="465" height="940" aria-label="Interactive portrait hockey rink whiteboard" tabindex="0" data-tool="select"><g id="rinkLayer"></g><g id="drawLayer"></g><g id="previewLayer" pointer-events="none"></g></svg>
         </div>
         <footer class="workspace-footer"><div id="status" role="status" aria-live="polite">Choose a tool from the menu to start your drill.</div><span class="saved-indicator" id="save-state">On this device</span></footer>
       </main>
@@ -157,7 +157,7 @@ const TOOL = {
   erase:{name:'Eraser',hint:'Tap an object to remove it. Undo brings it back.'}
 };
 let tool = 'select', color = '#1c2933', items = [], history = [], future = [], gesture = null, selected = -1;
-let rinkMode = 'full', view = {width:465,height:1040}, menuOpen = false;
+let rinkMode = 'full', view = {width:465,height:940}, menuOpen = false;
 let playerLabel = 'F1', textLabel = 'Note';
 const mobile = window.matchMedia('(max-width:760px)');
 const GROUPS = {move:['select'],draw:['pen','text'],routes:['skate','pass','shot'],players:['player'],objects:['puck','cone'],erase:['erase']};
@@ -168,22 +168,22 @@ const say = message => { $('status').textContent = message; };
 const markDirty = () => { $('save-state').textContent = 'Unsaved changes'; };
 const copy = value => JSON.parse(JSON.stringify(value));
 
-// Hockey Canada rink proportions: 200 × 85 ft, drawn at 5 SVG units per foot.
-// Rule 1.3: goal lines 11 ft from the ends; blue lines 64 ft from the goal lines.
+// Portrait coaching rink. Width and end markings retain the established proportions,
+// while each offensive zone is slightly compressed to reduce unused space on screen.
 function renderRink(rinkLayer, mode = 'full') {
   rinkLayer.replaceChildren();
   const half = mode === 'half';
-  const view = { width: 465, height: half ? 540 : 1040 };
+  const view = { width: 465, height: half ? 490 : 940 };
   if (mode === 'blank') {
-    rinkLayer.append(el('rect', { width:465, height:1040, rx:10, fill:'#fff' }));
+    rinkLayer.append(el('rect', { width:465, height:940, rx:10, fill:'#fff' }));
     return view;
   }
   const red = '#d74450', blue = '#3979b8', board = '#253b51';
   const clipId = 'hockey-rink-ice-clip';
-  const topHalf = 'M20 520 V160 A140 140 0 0 1 160 20 H305 A140 140 0 0 1 445 160 V520';
+  const topHalf = 'M20 470 V160 A140 140 0 0 1 160 20 H305 A140 140 0 0 1 445 160 V470';
   const iceShape = () => half
     ? el('path', { d: topHalf + ' Z' })
-    : el('rect', { x: 20, y: 20, width: 425, height: 1000, rx: 140 });
+    : el('rect', { x: 20, y: 20, width: 425, height: 900, rx: 140 });
   const defs = el('defs');
   const clip = el('clipPath', { id: clipId });
   clip.append(iceShape());
@@ -204,17 +204,18 @@ function renderRink(rinkLayer, mode = 'full') {
     add('line', { x1, y1, x2, y2, stroke: color, 'stroke-width': width }, parent);
 
   if (mode !== 'blank') {
-    // The neutral zone is 50 ft long. All transverse lines stop at the boards.
-    [395, 645].forEach(y => line(20, y, 445, y, blue, 5));
-    line(20, 520, 445, 520, red, 5);
+    // Keep the neutral zone balanced while bringing each blue line closer to the
+    // offensive-zone faceoff circles for a more compact coaching view.
+    [345, 595].forEach(y => line(20, y, 445, y, blue, 5));
+    line(20, 470, 445, 470, red, 5);
     // Small white interruptions make the red centre line easy to distinguish.
     for (let x = 25; x < 445; x += 18) {
-      line(x, 520, x + 7, 520, '#fff', 1.5);
+      line(x, 470, x + 7, 470, '#fff', 1.5);
     }
-    [75, 965].forEach(y => line(20, y, 445, y, red));
+    [75, 865].forEach(y => line(20, y, 445, y, red));
 
-    add('circle', { cx: 232.5, cy: 520, r: 75, fill: 'none', stroke: blue, 'stroke-width': 1.2 });
-    add('circle', { cx: 232.5, cy: 520, r: 2.5, fill: blue });
+    add('circle', { cx: 232.5, cy: 470, r: 75, fill: 'none', stroke: blue, 'stroke-width': 1.2 });
+    add('circle', { cx: 232.5, cy: 470, r: 2.5, fill: blue });
 
     function faceoff(cx, cy) {
       add('circle', { cx, cy, r: 75, fill: 'none', stroke: red, 'stroke-width': 1.1 });
@@ -234,10 +235,10 @@ function renderRink(rinkLayer, mode = 'full') {
         }
       }
     }
-    for (const y of [175, 865]) {
+    for (const y of [175, 765]) {
       for (const x of [122.5, 342.5]) faceoff(x, y);
     }
-    for (const y of [420, 620]) {
+    for (const y of [370, 570]) {
       for (const x of [122.5, 342.5]) add('circle', { cx: x, cy: y, r: 5, fill: red });
     }
 
@@ -270,13 +271,13 @@ function renderRink(rinkLayer, mode = 'full') {
       for (const x of [-15, 15]) add('circle', { cx: x, cy: 0, r: 1.5, fill: red }, group);
     }
     goal(75, 0, 'hockey-rink-top-net-clip');
-    if (!half) goal(965, 180, 'hockey-rink-bottom-net-clip');
+    if (!half) goal(865, 180, 'hockey-rink-bottom-net-clip');
   }
 
   // Half-rink boards terminate at centre ice; the open edge is not a new end wall.
   const outline = half
     ? el('path', { d: topHalf })
-    : el('rect', { x: 20, y: 20, width: 425, height: 1000, rx: 140 });
+    : el('rect', { x: 20, y: 20, width: 425, height: 900, rx: 140 });
   outline.setAttribute('fill', 'none');
   outline.setAttribute('stroke', board);
   outline.setAttribute('stroke-width', '3');
@@ -305,7 +306,7 @@ function syncMobileTools() {
     const active = button.dataset.group === group;
     button.classList.toggle('active',active); button.setAttribute('aria-pressed',String(active));
   });
-  $('mobile-context').hidden = !mobile.matches || ['move','erase'].includes(group);
+  $('mobile-context').hidden = !mobile.matches || group === 'move';
   $('subtools').replaceChildren();
   if (GROUPS[group].length > 1) GROUPS[group].forEach(name => {
     const button = document.createElement('button');
@@ -314,6 +315,13 @@ function syncMobileTools() {
     button.setAttribute('aria-pressed',String(name === tool));
     button.addEventListener('click',() => chooseTool(name)); $('subtools').append(button);
   });
+  if (group === 'erase') {
+    const clear = document.createElement('button');
+    clear.textContent = 'Clear entire board';
+    clear.className = 'danger';
+    clear.addEventListener('click', clearBoard);
+    $('subtools').append(clear);
+  }
   positionToolIndicator();
 }
 function rink() {
@@ -369,7 +377,7 @@ function chooseTool(next) {
   }
   syncMobileTools(); say(TOOL[tool].hint); render(); closeMobileMenu();
 }
-function data() { return {version:2,orientation:'portrait',title:$('title').value,rink:rinkMode,items:copy(items)}; }
+function data() { return {version:3,orientation:'portrait',title:$('title').value,rink:rinkMode,items:copy(items)}; }
 function capture() { return JSON.stringify(data()); }
 function snapshot(previous = capture()) { history.push(previous); if (history.length > 70) history.shift(); future = []; updateHistory(); }
 function updateHistory() { $('undo').disabled = !history.length; $('redo').disabled = !future.length; }
@@ -488,14 +496,16 @@ function up(event) {
 // and map the previous ice bounds onto the portrait ice exactly once.
 function normalizeBoard(input) {
   if (!input || !Array.isArray(input.items) || input.items.length > 5000) throw Error('Invalid board');
-  if (input.version !== undefined && input.version !== 1 && input.version !== 2) throw Error('Unsupported board version');
-  const legacy = input.version !== 2;
+  if (input.version !== undefined && ![1,2,3].includes(input.version)) throw Error('Unsupported board version');
+  const legacy = input.version !== 2 && input.version !== 3;
+  const compacted = input.version !== 3;
   let pointCount = 0;
   function point(value) {
     if (!Array.isArray(value) || value.length !== 2 || !value.every(v => typeof v === 'number' && Number.isFinite(v) && Math.abs(v) < 1000000)) throw Error('Invalid coordinates');
     let [x,y] = value;
     if (legacy) [x,y] = [445-(y-20)*425/480,20+(x-20)*(input.rink === 'half' ? 500 : 1000)/960];
-    return [Math.max(0,Math.min(465,x)),Math.max(0,Math.min(1040,y))];
+    if (compacted) y = 20 + (y - 20) * .9;
+    return [Math.max(0,Math.min(465,x)),Math.max(0,Math.min(940,y))];
   }
   const next = input.items.map(item => {
     if (!item || !['pen','skate','pass','shot','player','puck','cone','text'].includes(item.type)) throw Error('Unknown drawing tool');
@@ -508,11 +518,11 @@ function normalizeBoard(input) {
     const [x,y] = point([item.x,item.y]);
     return {type:item.type,x,y,color,label:String(item.label || (item.type === 'player' ? 'P' : '')).slice(0,item.type === 'player' ? 5 : 80)};
   });
-  return {version:2,orientation:'portrait',title:String(input.title || 'Hockey drill').slice(0,80),rink:['full','half','blank'].includes(input.rink) ? input.rink : 'full',items:next,legacy};
+  return {version:3,orientation:'portrait',title:String(input.title || 'Hockey drill').slice(0,80),rink:['full','half','blank'].includes(input.rink) ? input.rink : 'full',items:next,legacy,compacted};
 }
 function restore(input) {
   cancelGesture(); const next = normalizeBoard(input); snapshot(); applyState(next); markDirty();
-  say(next.legacy ? 'Board loaded. Your earlier drawing has been rotated to portrait.' : 'Board loaded.');
+  say(next.legacy ? 'Board loaded. Your earlier drawing has been rotated to portrait.' : next.compacted ? 'Board loaded and fitted to the more compact rink.' : 'Board loaded.');
   closeMobileMenu();
 }
 function saveBoard() {
@@ -575,11 +585,12 @@ mobile.addEventListener('change',() => { setMenu(!mobile.matches,false); syncMob
 document.querySelectorAll('[data-group]').forEach(button => button.addEventListener('click',() => chooseTool(groupChoice[button.dataset.group])));
 $('undo').addEventListener('click',undo); $('redo').addEventListener('click',redo);
 $('save').addEventListener('click',saveBoard); $('quick-save').addEventListener('click',saveBoard); $('load').addEventListener('click',loadBoard);
-$('new').addEventListener('click',() => {
+function clearBoard() {
   if (!items.length) { say('The board is already clear.'); closeMobileMenu(); return; }
   if (!confirm('Clear the drawings on this board? You can undo this.')) return;
   cancelGesture(); snapshot(); items = []; selected = -1; render(); markDirty(); say('Board cleared. Use Undo to bring the drawings back.'); closeMobileMenu();
-});
+}
+$('new').addEventListener('click',clearBoard);
 $('import').addEventListener('click',() => $('file').click());
 $('file').addEventListener('change',async event => {
   const file = event.target.files[0]; if (!file) return;
