@@ -168,7 +168,7 @@ const TOOL = {
 };
 let tool = 'select', color = '#1c2933', items = [], history = [], future = [], gesture = null, selected = -1;
 let rinkMode = 'full', orientation = 'portrait', canonicalView = {width:465,height:886}, view = {width:465,height:886}, menuOpen = false;
-let playerLabel = '', textLabel = 'Note', shapeKind = 'circle', shapeSize = 120;
+let playerLabel = '', textLabel = 'Note', shapeKind = 'circle', shapeSize = 120, shapeResizeBefore = null;
 const mobile = window.matchMedia('(max-width:760px)');
 const GROUPS = {move:['select'],draw:['pen','text'],routes:['skate','pass','shot'],players:['player'],objects:['puck','cone','shape'],erase:['erase']};
 const groupChoice = {move:'select',draw:'pen',routes:'skate',players:'player',objects:'puck',erase:'erase'};
@@ -377,6 +377,21 @@ function setMenu(open, restoreFocus = true) {
   requestAnimationFrame(fitBoard);
 }
 function closeMobileMenu() { if (mobile.matches && menuOpen) setMenu(false); }
+function syncShapeControl() {
+  const selectedShape = selected >= 0 && items[selected]?.type === 'shape' ? items[selected] : null;
+  const visible = tool === 'shape' || !!selectedShape;
+  $('shape-control').hidden = !visible;
+  $('shape-kind').disabled = !!selectedShape && tool !== 'shape';
+  if (selectedShape) {
+    $('shape-kind').value = selectedShape.shape || 'circle';
+    $('shape-size').value = selectedShape.size || 120;
+    $('shape-size-value').textContent = selectedShape.size || 120;
+  } else {
+    $('shape-kind').value = shapeKind;
+    $('shape-size').value = shapeSize;
+    $('shape-size-value').textContent = shapeSize;
+  }
+}
 function chooseTool(next) {
   cancelGesture(); tool = next; selected = -1;
   document.querySelectorAll('[data-tool].tool-button').forEach(button => {
@@ -389,20 +404,19 @@ function chooseTool(next) {
   $('tool-hint').textContent = TOOL[tool].hint;
   const hasLabel = tool === 'player' || tool === 'text';
   $('label-control').hidden = !hasLabel;
-  $('shape-control').hidden = tool !== 'shape';
   if (hasLabel) {
     $('object-label').value = tool === 'player' ? playerLabel : textLabel;
     $('object-label').maxLength = tool === 'player' ? 5 : 80;
     $('object-label').setAttribute('aria-label',tool === 'player' ? 'Player label' : 'Text to place');
     $('label-caption').textContent = tool === 'player' ? 'Player label' : 'Text to place';
   }
-  syncMobileTools(); say(TOOL[tool].hint); render(); closeMobileMenu();
+  syncShapeControl(); syncMobileTools(); say(TOOL[tool].hint); render(); closeMobileMenu();
 }
 function data() { return {version:11,orientation,title:$('title').value,rink:rinkMode,items:copy(items)}; }
 function capture() { return JSON.stringify(data()); }
 function snapshot(previous = capture()) { history.push(previous); if (history.length > 70) history.shift(); future = []; updateHistory(); }
 function updateHistory() { $('undo').disabled = !history.length; $('redo').disabled = !future.length; }
-function applyState(state, restoreTitle = true) { items = state.items; rinkMode = state.rink; orientation = state.orientation || 'portrait'; if (restoreTitle) $('title').value = state.title; selected = -1; rink(); render(); }
+function applyState(state, restoreTitle = true) { items = state.items; rinkMode = state.rink; orientation = state.orientation || 'portrait'; if (restoreTitle) $('title').value = state.title; selected = -1; rink(); render(); syncShapeControl(); }
 function undo() { cancelGesture(); if (!history.length) return; future.push(capture()); applyState(JSON.parse(history.pop()),false); updateHistory(); markDirty(); say('Last change undone.'); }
 function redo() { cancelGesture(); if (!future.length) return; history.push(capture()); applyState(JSON.parse(future.pop()),false); updateHistory(); markDirty(); say('Change restored.'); }
 
@@ -472,7 +486,7 @@ function pointerPoint(event) {
 function hit(event) { const group = event.target.closest('[data-index]'); return group && drawLayer.contains(group) ? Number(group.dataset.index) : -1; }
 function cancelGesture() {
   if (gesture?.kind === 'move') { items[gesture.index] = gesture.original; render(); }
-  gesture = null; previewLayer.replaceChildren();
+  gesture = null; shapeResizeBefore = null; previewLayer.replaceChildren();
 }
 function down(event) {
   if (!event.isPrimary || event.button !== 0 || gesture) return;
@@ -480,10 +494,10 @@ function down(event) {
   const point = pointerPoint(event), index = hit(event);
   board.setPointerCapture(event.pointerId);
   if (tool === 'erase') {
-    if (index >= 0) { snapshot(); items.splice(index,1); selected = -1; render(); markDirty(); say('Object erased.'); } return;
+    if (index >= 0) { snapshot(); items.splice(index,1); selected = -1; render(); syncShapeControl(); markDirty(); say('Object erased.'); } return;
   }
   if (tool === 'select') {
-    selected = index; render();
+    selected = index; render(); syncShapeControl();
     if (index >= 0) gesture = {kind:'move',pointerId:event.pointerId,index,start:point,original:copy(items[index]),before:capture(),moved:false};
     return;
   }
@@ -669,8 +683,27 @@ document.querySelectorAll('[data-color]').forEach(button => button.addEventListe
   say(button.getAttribute('aria-label') + ' selected for new drawings.');
 }));
 $('object-label').addEventListener('input',() => { if (tool === 'player') playerLabel = $('object-label').value; else textLabel = $('object-label').value; });
-$('shape-kind').addEventListener('change',event => { shapeKind = event.target.value; say(TOOL.shape.hint); });
-$('shape-size').addEventListener('input',event => { shapeSize = Number(event.target.value); $('shape-size-value').textContent = shapeSize; });
+$('shape-kind').addEventListener('change',event => {
+  if (selected >= 0 && items[selected]?.type === 'shape' && tool !== 'shape') return;
+  shapeKind = event.target.value; say(TOOL.shape.hint);
+});
+$('shape-size').addEventListener('input',event => {
+  const value = Math.max(40,Math.min(260,Number(event.target.value) || 120));
+  $('shape-size-value').textContent = value;
+  if (selected >= 0 && items[selected]?.type === 'shape' && tool === 'select') {
+    if (!shapeResizeBefore) shapeResizeBefore = capture();
+    items[selected].size = value;
+    render(); markDirty(); say('Shape resized.');
+  } else {
+    shapeSize = value;
+  }
+});
+$('shape-size').addEventListener('change',() => {
+  if (shapeResizeBefore) {
+    snapshot(shapeResizeBefore);
+    shapeResizeBefore = null;
+  }
+});
 $('title').addEventListener('input',markDirty);
 $('rink').addEventListener('change',() => { cancelGesture(); snapshot(); rinkMode = $('rink').value; rink(); markDirty(); say(rinkMode === 'half' ? 'Showing the top half. Full rink shows all your drawings.' : 'Rink view changed.'); closeMobileMenu(); });
 function setOrientation(next) {
@@ -718,10 +751,10 @@ document.addEventListener('keydown',event => {
   if (event.target.matches('input,textarea,select,[contenteditable=true]')) return;
   if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z') { event.preventDefault(); event.shiftKey ? redo() : undo(); }
   if (event.key === 'Escape') { cancelGesture(); selected = -1; render(); }
-  if ((event.key === 'Delete' || event.key === 'Backspace') && selected >= 0) { event.preventDefault(); snapshot(); items.splice(selected,1); selected = -1; render(); markDirty(); }
+  if ((event.key === 'Delete' || event.key === 'Backspace') && selected >= 0) { event.preventDefault(); snapshot(); items.splice(selected,1); selected = -1; render(); syncShapeControl(); markDirty(); }
 });
 new ResizeObserver(fitBoard).observe($('board-stage'));
-setMenu(!mobile.matches,false); syncMobileTools(); rink(); render(); updateHistory();
+setMenu(!mobile.matches,false); syncMobileTools(); rink(); render(); syncShapeControl(); updateHistory();
 
 </script>
 </body>
