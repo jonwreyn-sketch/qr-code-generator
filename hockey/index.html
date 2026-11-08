@@ -13,8 +13,8 @@
     *{box-sizing:border-box}body{margin:0}button,input,select,summary{font:inherit}button,select,summary{cursor:pointer}button{color:inherit}button:disabled{cursor:default;opacity:.38}button,input,select{outline-offset:3px}button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid #75a891}button{touch-action:manipulation}button:hover:not(:disabled){background:#edf1ee}input,select{min-width:0}svg.icon{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;pointer-events:none}.icon-defs{position:absolute;width:0;height:0;overflow:hidden}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}[hidden]{display:none!important}
     .app-shell{height:100vh;height:100dvh;min-height:420px;display:grid;grid-template-rows:66px minmax(0,1fr)}.app-header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 24px;border-bottom:1px solid var(--border);background:#fff;z-index:5}.brand{display:flex;align-items:center;gap:13px}.brand-mark{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:var(--green-light);color:var(--green)}.brand h1{font-size:18px;letter-spacing:-.45px;margin:0;font-weight:650}.header-right{display:flex;gap:10px;align-items:center}.device-note{color:var(--muted);font-size:12px}.icon-button{display:grid;place-items:center;width:40px;height:40px;padding:0;border:1px solid transparent;background:transparent;border-radius:9px}.menu-toggle{display:flex;align-items:center;gap:8px;border:1px solid var(--border);padding:0 11px;width:auto;font-size:13px;font-weight:600}.save-button{height:38px;padding:0 14px;display:flex;align-items:center;justify-content:center;gap:7px;background:var(--green);border:1px solid var(--green);border-radius:9px;color:#fff;font-size:13px;font-weight:600}.save-button:hover:not(:disabled){background:#195940}.save-button .icon{width:17px;height:17px}
     .app-body{min-height:0;display:grid;grid-template-columns:242px minmax(0,1fr);transition:grid-template-columns .18s}.app-shell.menu-hidden .app-body{grid-template-columns:0 minmax(0,1fr)}.sidebar{width:242px;min-height:0;overflow:hidden;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:20}.menu-hidden .sidebar{visibility:hidden}.sidebar-heading{display:flex;align-items:center;justify-content:space-between;padding:14px 15px 8px}.sidebar-heading h2{margin:0;font-size:14px;font-weight:650}.sidebar-heading .icon-button{width:30px;height:30px}.sidebar-content{overflow-y:auto;overscroll-behavior:contain;padding:0 13px 20px;scrollbar-width:thin}.menu-label{margin:15px 10px 7px;color:#758077;font-size:10px;font-weight:700;letter-spacing:1.15px;text-transform:uppercase}.tool-list{display:grid;gap:3px}.tool-button{border:1px solid transparent;background:transparent;display:flex;align-items:center;gap:11px;text-align:left;width:100%;padding:8px 11px;border-radius:8px;min-height:38px;font-size:13px}.tool-button .icon{color:#68776e}.tool-button.active{background:var(--green-light);color:#20553f;font-weight:650;border-color:#dcebe1}.tool-button.active .icon{color:var(--green)}.tool-dot{margin-left:auto;width:5px;height:5px;background:var(--green);border-radius:50%;visibility:hidden}.tool-button.active .tool-dot{visibility:visible}.menu-rule{height:1px;background:var(--border);margin:15px 5px}.menu-field{display:block;padding:0 10px}.menu-field span{display:block;margin:0 0 7px;font-size:12px;font-weight:600}.menu-field select{width:100%;background:#fafbf9;border:1px solid var(--border);border-radius:8px;padding:9px;font-size:13px;color:#33413a}.swatches{display:flex;gap:12px;padding:3px 10px 1px}.swatches button{display:grid;place-items:center;height:31px;width:31px;border-radius:50%;padding:0;border:3px solid #fff;outline:1px solid #d9dfda;background:var(--swatch)}.swatches button:hover{background:var(--swatch)!important}.swatches button.chosen{outline:2px solid var(--green)}.swatches button .icon{width:15px;height:15px;color:#fff;visibility:hidden}.swatches button.chosen .icon{visibility:visible}.board-actions{margin-top:18px;padding-top:12px;border-top:1px solid var(--border)}.board-actions summary{font-size:12px;font-weight:600;padding:7px 10px;color:#526058}.board-actions .tool-button{font-size:12px}.board-actions .danger{color:#a5423e}.storage-hint{color:var(--muted);font-size:11px;line-height:1.5;margin:12px 10px 0}
-    .workspace{min-width:0;min-height:0;display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:12px;padding:18px 28px 12px}.workspace-heading{width:100%;max-width:1060px;margin:0 auto}.title-row{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:12px}.title-input{width:min(100%,380px);font-size:19px;font-weight:650;letter-spacing:-.5px;background:transparent;border:1px solid transparent;border-radius:7px;padding:5px 7px;margin-left:-7px;color:#29352f}.title-input:hover,.title-input:focus{border-color:#d1dcd4;background:#fff}.view-label{font-size:11px;letter-spacing:.3px;color:#78837c;white-space:nowrap}.view-select{font-size:12px;font-weight:650;color:#53657c;background:#fff;border:1px solid var(--border);border-radius:8px;padding:7px 28px 7px 9px;white-space:nowrap}.board-toolbar{display:flex;align-items:center;gap:10px;min-height:44px}.active-tool{display:flex;align-items:center;gap:8px;border:1px solid #d7e1d9;border-radius:9px;background:#fff;padding:9px 11px;font-size:12px;font-weight:650;white-space:nowrap}.active-tool>.icon:first-child{color:var(--green);width:18px;height:18px}.active-tool>.chevron{width:12px;height:12px;color:#7f8a83}.tool-hint{font-size:12px;color:var(--muted);flex:1;line-height:1.4}.label-input{width:160px;border:1px solid var(--border);border-radius:8px;padding:9px 10px;font-size:13px;background:#fff}.history-actions{display:flex;gap:4px;margin-left:auto}.history-actions .icon-button{width:36px;height:36px;background:#fff;border-color:var(--border)}.board-stage{min-width:0;min-height:0;display:flex;justify-content:center;align-items:center;overflow:hidden;border:1px solid #e5eae5;border-radius:15px;background:#edf1ec;padding:10px}.board-canvas{display:block;flex-shrink:0;touch-action:none;user-select:none;-webkit-user-select:none;max-width:100%;max-height:100%;font-family:Arial,sans-serif;border-radius:10px;outline-offset:-4px}.board-canvas:focus-visible{outline:2px solid #91b19d}.board-canvas[data-tool=select]{cursor:default}.board-canvas[data-tool]:not([data-tool=select]){cursor:crosshair}.selection-outline{fill:none;stroke:#386d55;stroke-width:1.8;stroke-dasharray:5 4;pointer-events:none}.workspace-footer{min-height:20px;display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--muted);font-size:11px;line-height:1.45}.workspace-footer #status{flex:1;min-width:0;color:#4a6556}.saved-indicator{display:flex;align-items:center;gap:5px;white-space:nowrap}.saved-indicator:before{content:"";width:5px;height:5px;background:#95aa9c;border-radius:50%}.backdrop{position:fixed;inset:0;background:#17251d66;border:0;z-index:30;cursor:default}.backdrop:hover:not(:disabled){background:#17251d66}
-    @media(max-width:760px){.app-shell{grid-template-rows:58px minmax(0,1fr)}.app-header{padding:0 13px;gap:8px}.brand{gap:9px}.brand-mark,.device-note,.menu-toggle span{display:none}.brand h1{font-size:16px}.header-right{gap:6px}.menu-toggle{width:36px;height:36px;padding:0;justify-content:center}.save-button{padding:0 11px;height:36px}.app-body,.app-shell.menu-hidden .app-body{grid-template-columns:minmax(0,1fr)}.sidebar{position:fixed;inset:0 auto 0 0;height:100vh;height:100dvh;width:min(290px,calc(100vw - 44px));z-index:40;box-shadow:12px 0 40px #13271b1c;transform:translateX(-102%);visibility:hidden;transition:transform .18s,visibility .18s}.app-shell.menu-open .sidebar{transform:translateX(0);visibility:visible}.sidebar-heading{padding:17px 17px 9px}.sidebar-heading h2{font-size:16px}.sidebar-heading .icon-button{width:36px;height:36px}.sidebar-content{padding:0 15px 25px}.tool-button{min-height:41px;font-size:14px}.workspace{padding:12px 12px max(9px,env(safe-area-inset-bottom));gap:9px}.title-row{margin-bottom:7px;gap:5px}.title-input{font-size:16px;max-width:80%;padding:4px 7px}.view-label{font-size:10px}.view-select{font-size:11px;padding:6px 25px 6px 8px}.board-toolbar{gap:7px;min-height:40px}.active-tool{padding:8px;font-size:12px;gap:5px}.tool-hint{display:none}.label-input{width:100%;max-width:135px;font-size:16px;padding:6px 8px}.history-actions{gap:4px}.history-actions .icon-button{width:32px;height:34px}.board-stage{padding:7px;border-radius:12px}.workspace-footer{font-size:10px;min-height:27px;gap:5px;align-items:flex-start}.saved-indicator{font-size:10px;margin-top:1px}}@media(max-width:355px){.brand h1{font-size:14px}.save-button span{display:none}.save-button{width:34px;padding:0}.workspace{padding-left:8px;padding-right:8px}.active-tool>.chevron{display:none}.label-input{max-width:102px}.saved-indicator{display:none}}@media(prefers-reduced-motion:reduce){.app-body,.sidebar{transition:none}}
+    .workspace{min-width:0;min-height:0;display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:12px;padding:18px 28px 12px}.workspace-heading{width:100%;max-width:1060px;margin:0 auto}.title-row{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:12px}.title-input{width:min(100%,380px);font-size:19px;font-weight:650;letter-spacing:-.5px;background:transparent;border:1px solid transparent;border-radius:7px;padding:5px 7px;margin-left:-7px;color:#29352f}.title-input:hover,.title-input:focus{border-color:#d1dcd4;background:#fff}.view-label{font-size:11px;letter-spacing:.3px;color:#78837c;white-space:nowrap}.view-select{font-size:12px;font-weight:650;color:#53657c;background:#fff;border:1px solid var(--border);border-radius:8px;padding:7px 28px 7px 9px;white-space:nowrap}.board-toolbar{display:flex;align-items:center;gap:10px;min-height:44px}.active-tool{display:flex;align-items:center;gap:8px;border:1px solid #d7e1d9;border-radius:9px;background:#fff;padding:9px 11px;font-size:12px;font-weight:650;white-space:nowrap}.active-tool>.icon:first-child{color:var(--green);width:18px;height:18px}.active-tool>.chevron{width:12px;height:12px;color:#7f8a83}.tool-hint{font-size:12px;color:var(--muted);flex:1;line-height:1.4}.label-input{width:160px;border:1px solid var(--border);border-radius:8px;padding:9px 10px;font-size:13px;background:#fff}.shape-options{display:flex;align-items:center;gap:10px;margin-top:7px;padding:8px 10px;border:1px solid var(--border);border-radius:9px;background:#fff;font-size:12px}.shape-options label{display:flex;align-items:center;gap:7px;color:#53657c;font-weight:600}.shape-options select{border:1px solid var(--border);border-radius:7px;padding:6px 26px 6px 8px;background:#fff;color:#33413a}.shape-options input[type=range]{width:150px}.shape-size-value{min-width:34px;color:#627087;font-variant-numeric:tabular-nums}.history-actions{display:flex;gap:4px;margin-left:auto}.history-actions .icon-button{width:36px;height:36px;background:#fff;border-color:var(--border)}.board-stage{min-width:0;min-height:0;display:flex;justify-content:center;align-items:center;overflow:hidden;border:1px solid #e5eae5;border-radius:15px;background:#edf1ec;padding:10px}.board-canvas{display:block;flex-shrink:0;touch-action:none;user-select:none;-webkit-user-select:none;max-width:100%;max-height:100%;font-family:Arial,sans-serif;border-radius:10px;outline-offset:-4px}.board-canvas:focus-visible{outline:2px solid #91b19d}.board-canvas[data-tool=select]{cursor:default}.board-canvas[data-tool]:not([data-tool=select]){cursor:crosshair}.selection-outline{fill:none;stroke:#386d55;stroke-width:1.8;stroke-dasharray:5 4;pointer-events:none}.workspace-footer{min-height:20px;display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--muted);font-size:11px;line-height:1.45}.workspace-footer #status{flex:1;min-width:0;color:#4a6556}.saved-indicator{display:flex;align-items:center;gap:5px;white-space:nowrap}.saved-indicator:before{content:"";width:5px;height:5px;background:#95aa9c;border-radius:50%}.backdrop{position:fixed;inset:0;background:#17251d66;border:0;z-index:30;cursor:default}.backdrop:hover:not(:disabled){background:#17251d66}
+    @media(max-width:760px){.app-shell{grid-template-rows:58px minmax(0,1fr)}.app-header{padding:0 13px;gap:8px}.brand{gap:9px}.brand-mark,.device-note,.menu-toggle span{display:none}.brand h1{font-size:16px}.header-right{gap:6px}.menu-toggle{width:36px;height:36px;padding:0;justify-content:center}.save-button{padding:0 11px;height:36px}.app-body,.app-shell.menu-hidden .app-body{grid-template-columns:minmax(0,1fr)}.sidebar{position:fixed;inset:0 auto 0 0;height:100vh;height:100dvh;width:min(290px,calc(100vw - 44px));z-index:40;box-shadow:12px 0 40px #13271b1c;transform:translateX(-102%);visibility:hidden;transition:transform .18s,visibility .18s}.app-shell.menu-open .sidebar{transform:translateX(0);visibility:visible}.sidebar-heading{padding:17px 17px 9px}.sidebar-heading h2{font-size:16px}.sidebar-heading .icon-button{width:36px;height:36px}.sidebar-content{padding:0 15px 25px}.tool-button{min-height:41px;font-size:14px}.workspace{padding:12px 12px max(9px,env(safe-area-inset-bottom));gap:9px}.title-row{margin-bottom:7px;gap:5px}.title-input{font-size:16px;max-width:80%;padding:4px 7px}.view-label{font-size:10px}.view-select{font-size:11px;padding:6px 25px 6px 8px}.board-toolbar{gap:7px;min-height:40px}.active-tool{padding:8px;font-size:12px;gap:5px}.tool-hint{display:none}.label-input{width:100%;max-width:135px;font-size:16px;padding:6px 8px}.shape-options{flex-wrap:wrap;gap:7px;padding:7px 8px}.shape-options input[type=range]{width:120px}.history-actions{gap:4px}.history-actions .icon-button{width:32px;height:34px}.board-stage{padding:7px;border-radius:12px}.workspace-footer{font-size:10px;min-height:27px;gap:5px;align-items:flex-start}.saved-indicator{font-size:10px;margin-top:1px}}@media(max-width:355px){.brand h1{font-size:14px}.save-button span{display:none}.save-button{width:34px;padding:0}.workspace{padding-left:8px;padding-right:8px}.active-tool>.chevron{display:none}.label-input{max-width:102px}.saved-indicator{display:none}}@media(prefers-reduced-motion:reduce){.app-body,.sidebar{transition:none}}
     /* Navigation follows Clearwork's sidebar / mobile bottom-bar pattern. */
     :root{color:#162a49;background:#f5f7fb;--muted:#627087;--border:#dfe5ef;--green:#233f68;--green-light:#edf2fb;--accent:#facc15}
     .brand-mark{background:#fff6cb;color:#263c5b}.tool-button{position:relative}.tool-button.active{background:#edf2fb;color:#162a49;border-color:transparent}.tool-button.active:before{content:"";position:absolute;left:-1px;top:8px;bottom:8px;width:3px;border-radius:3px;background:var(--accent)}.tool-dot{background:#dbb10b}.board-stage{background:#edf1f6;border-color:#e0e6ee}.title-input{color:#162a49}.view-label{color:#627087}.selection-outline{stroke:#315d96}.workspace-footer #status{color:#50627a}.mobile-tools,.mobile-context{display:none}
@@ -37,6 +37,7 @@
     <symbol id="i-player" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v8m-2-6 2-2"/></symbol>
     <symbol id="i-puck" viewBox="0 0 24 24"><ellipse cx="12" cy="10" rx="7" ry="4"/><path d="M5 10v4c0 5 14 5 14 0v-4"/></symbol>
     <symbol id="i-cone" viewBox="0 0 24 24"><path d="m12 3 7 17H5L12 3ZM8 12h8M3 20h18"/></symbol>
+    <symbol id="i-shape" viewBox="0 0 24 24"><circle cx="7" cy="7" r="3"/><rect x="12" y="4" width="6" height="6"/><path d="m8 19 4-7 4 7H8Z"/></symbol>
     <symbol id="i-text" viewBox="0 0 24 24"><path d="M4 7V4h16v3M12 4v16M8 20h8"/></symbol>
     <symbol id="i-erase" viewBox="0 0 24 24"><path d="m14 3 7 7-11 11H7L2 16 14 3ZM8 10l7 7M10 21h11"/></symbol>
     <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 3 4 8l5 5M4 8h10a6 6 0 0 1 0 12"/></symbol>
@@ -77,6 +78,7 @@
               <button class="tool-button" data-tool="player" aria-pressed="false"><svg class="icon"><use href="#i-player"/></svg><span>Player</span><span class="tool-dot"></span></button>
               <button class="tool-button" data-tool="puck" aria-pressed="false"><svg class="icon"><use href="#i-puck"/></svg><span>Puck</span><span class="tool-dot"></span></button>
               <button class="tool-button" data-tool="cone" aria-pressed="false"><svg class="icon"><use href="#i-cone"/></svg><span>Cone</span><span class="tool-dot"></span></button>
+              <button class="tool-button" data-tool="shape" aria-pressed="false"><svg class="icon"><use href="#i-shape"/></svg><span>Shape</span><span class="tool-dot"></span></button>
               <button class="tool-button" data-tool="text" aria-pressed="false"><svg class="icon"><use href="#i-text"/></svg><span>Text</span><span class="tool-dot"></span></button>
               <button class="tool-button" data-tool="erase" aria-pressed="false"><svg class="icon"><use href="#i-erase"/></svg><span>Eraser</span><span class="tool-dot"></span></button>
             </div>
@@ -113,6 +115,10 @@
             <label id="label-control" hidden><span class="sr-only" id="label-caption">Player label</span><input class="label-input" id="object-label" type="text" maxlength="5" value="" aria-label="Player label"></label>
             <span class="tool-hint" id="tool-hint">Tap an object, then drag it into position.</span>
             <div class="history-actions"><button class="icon-button" id="undo" aria-label="Undo" title="Undo" disabled><svg class="icon"><use href="#i-undo"/></svg></button><button class="icon-button" id="redo" aria-label="Redo" title="Redo" disabled><svg class="icon"><use href="#i-redo"/></svg></button></div>
+          </div>
+          <div class="shape-options" id="shape-control" hidden>
+            <label>Shape <select id="shape-kind" aria-label="Shape type"><option value="circle">Circle</option><option value="square">Square</option><option value="triangle">Triangle</option></select></label>
+            <label>Size <input id="shape-size" type="range" min="40" max="260" step="10" value="120" aria-label="Shape size"><span class="shape-size-value" id="shape-size-value">120</span></label>
           </div>
           <div class="mobile-context" id="mobile-context" hidden>
             <div class="subtools" id="subtools" aria-label="Tool options"></div>
@@ -156,14 +162,15 @@ const TOOL = {
   player:{name:'Player',hint:'Set a label, then tap the rink to place a player.'},
   puck:{name:'Puck',hint:'Tap the rink to place a puck.'},
   cone:{name:'Cone',hint:'Tap the rink to place a cone.'},
+  shape:{name:'Shape',hint:'Choose a shape and size, then tap the rink to place it.'},
   text:{name:'Text',hint:'Enter a note, then tap the rink to place it.'},
   erase:{name:'Eraser',hint:'Tap an object to remove it. Undo brings it back.'}
 };
 let tool = 'select', color = '#1c2933', items = [], history = [], future = [], gesture = null, selected = -1;
 let rinkMode = 'full', orientation = 'portrait', canonicalView = {width:465,height:886}, view = {width:465,height:886}, menuOpen = false;
-let playerLabel = '', textLabel = 'Note';
+let playerLabel = '', textLabel = 'Note', shapeKind = 'circle', shapeSize = 120;
 const mobile = window.matchMedia('(max-width:760px)');
-const GROUPS = {move:['select'],draw:['pen','text'],routes:['skate','pass','shot'],players:['player'],objects:['puck','cone'],erase:['erase']};
+const GROUPS = {move:['select'],draw:['pen','text'],routes:['skate','pass','shot'],players:['player'],objects:['puck','cone','shape'],erase:['erase']};
 const groupChoice = {move:'select',draw:'pen',routes:'skate',players:'player',objects:'puck',erase:'erase'};
 const toolGroup = name => Object.keys(GROUPS).find(group => GROUPS[group].includes(name));
 const el = (tag, attrs = {}) => { const node = document.createElementNS(NS, tag); Object.entries(attrs).forEach(([key,value]) => node.setAttribute(key,String(value))); return node; };
@@ -382,6 +389,7 @@ function chooseTool(next) {
   $('tool-hint').textContent = TOOL[tool].hint;
   const hasLabel = tool === 'player' || tool === 'text';
   $('label-control').hidden = !hasLabel;
+  $('shape-control').hidden = tool !== 'shape';
   if (hasLabel) {
     $('object-label').value = tool === 'player' ? playerLabel : textLabel;
     $('object-label').maxLength = tool === 'player' ? 5 : 80;
@@ -390,7 +398,7 @@ function chooseTool(next) {
   }
   syncMobileTools(); say(TOOL[tool].hint); render(); closeMobileMenu();
 }
-function data() { return {version:10,orientation,title:$('title').value,rink:rinkMode,items:copy(items)}; }
+function data() { return {version:11,orientation,title:$('title').value,rink:rinkMode,items:copy(items)}; }
 function capture() { return JSON.stringify(data()); }
 function snapshot(previous = capture()) { history.push(previous); if (history.length > 70) history.shift(); future = []; updateHistory(); }
 function updateHistory() { $('undo').disabled = !history.length; $('redo').disabled = !future.length; }
@@ -401,7 +409,18 @@ function redo() { cancelGesture(); if (!future.length) return; history.push(capt
 function itemGraphic(item, index, preview = false) {
   const group = el('g', preview ? {} : {'data-index':index,'data-type':item.type,'aria-label':TOOL[item.type].name + (item.label ? ' ' + item.label : '')});
   const points = item.pts || [], stroke = item.color;
-  if (item.type === 'pen') {
+  if (item.type === 'shape') {
+    const size = Math.max(40,Math.min(260,Number(item.size) || 120));
+    const attrs = {fill:stroke,'fill-opacity':.12,stroke,'stroke-opacity':.5,'stroke-width':1.8};
+    if (item.shape === 'square') {
+      group.append(el('rect',{x:item.x-size/2,y:item.y-size/2,width:size,height:size,rx:5,...attrs}));
+    } else if (item.shape === 'triangle') {
+      const h = size * .866;
+      group.append(el('polygon',{points:`${item.x},${item.y-h/2} ${item.x-size/2},${item.y+h/2} ${item.x+size/2},${item.y+h/2}`,...attrs}));
+    } else {
+      group.append(el('circle',{cx:item.x,cy:item.y,r:size/2,...attrs}));
+    }
+  } else if (item.type === 'pen') {
     const line = points.map(point => point.join(',')).join(' ');
     group.append(el('polyline',{points:line,fill:'none',stroke:stroke,'stroke-width':3.2,'stroke-linecap':'round','stroke-linejoin':'round'}));
     if (!preview) group.append(el('polyline',{points:line,fill:'none',stroke:'transparent','stroke-width':15,'pointer-events':'stroke'}));
@@ -433,7 +452,8 @@ function itemGraphic(item, index, preview = false) {
 }
 function render() {
   drawLayer.replaceChildren();
-  items.forEach((item,index) => {
+  const ordered = items.map((item,index) => ({item,index})).sort((a,b) => (a.item.type === 'shape' ? 0 : 1) - (b.item.type === 'shape' ? 0 : 1));
+  ordered.forEach(({item,index}) => {
     const group = itemGraphic(item,index); drawLayer.append(group);
     if (selected === index) {
       const box = group.getBBox();
@@ -468,10 +488,13 @@ function down(event) {
     return;
   }
   selected = -1;
-  if (['player','puck','cone','text'].includes(tool)) {
+  if (['player','puck','cone','text','shape'].includes(tool)) {
     const label = tool === 'player' ? $('object-label').value.trim().slice(0,5) : tool === 'text' ? $('object-label').value.trim().slice(0,80) : '';
     if (tool === 'text' && !label) { say('Enter the text you want to place.'); $('object-label').focus(); return; }
-    snapshot(); items.push({type:tool,x:point[0],y:point[1],color,label}); render(); markDirty(); return;
+    snapshot();
+    if (tool === 'shape') items.push({type:'shape',x:point[0],y:point[1],color,shape:shapeKind,size:shapeSize});
+    else items.push({type:tool,x:point[0],y:point[1],color,label});
+    render(); markDirty(); return;
   }
   gesture = {kind:'draw',pointerId:event.pointerId,type:tool,pts:[point,point],color};
 }
@@ -518,11 +541,11 @@ function up(event) {
 // and map the previous ice bounds onto the portrait ice exactly once.
 function normalizeBoard(input) {
   if (!input || !Array.isArray(input.items) || input.items.length > 5000) throw Error('Invalid board');
-  if (input.version !== undefined && ![1,2,3,4,5,6,7,8,9,10].includes(input.version)) throw Error('Unsupported board version');
+  if (input.version !== undefined && ![1,2,3,4,5,6,7,8,9,10,11].includes(input.version)) throw Error('Unsupported board version');
   const sourceVersion = input.version ?? 1;
   const legacy = sourceVersion === 1;
   const scaleToOriginal = {3:10/9,4:25/21,5:25/18,6:50/39};
-  const sourceOrientation = [8,9,10].includes(sourceVersion) && input.orientation === 'landscape' ? 'landscape' : 'portrait';
+  const sourceOrientation = [8,9,10,11].includes(sourceVersion) && input.orientation === 'landscape' ? 'landscape' : 'portrait';
   let pointCount = 0;
 
   function compressOriginalY(y) {
@@ -549,7 +572,7 @@ function normalizeBoard(input) {
   function point(value) {
     if (!Array.isArray(value) || value.length !== 2 || !value.every(v => typeof v === 'number' && Number.isFinite(v) && Math.abs(v) < 1000000)) throw Error('Invalid coordinates');
     let [x,y] = value;
-    if (sourceVersion === 10) {
+    if (sourceVersion === 10 || sourceVersion === 11) {
       return [Math.max(0,Math.min(465,x)),Math.max(0,Math.min(886,y))];
     }
     if (sourceVersion !== 9) {
@@ -567,7 +590,7 @@ function normalizeBoard(input) {
     return [Math.max(0,Math.min(465,x)),Math.max(0,Math.min(886,y))];
   }
   const next = input.items.map(item => {
-    if (!item || !['pen','skate','pass','shot','player','puck','cone','text'].includes(item.type)) throw Error('Unknown drawing tool');
+    if (!item || !['pen','skate','pass','shot','player','puck','cone','text','shape'].includes(item.type)) throw Error('Unknown drawing tool');
     const color = typeof item.color === 'string' && /^#[0-9a-f]{6}$/i.test(item.color) ? item.color : '#1c2933';
     if (['pen','skate','pass','shot'].includes(item.type)) {
       if (!Array.isArray(item.pts) || item.pts.length < 2 || (item.type !== 'pen' && item.pts.length !== 2)) throw Error('Invalid stroke');
@@ -575,16 +598,19 @@ function normalizeBoard(input) {
       return {type:item.type,color,pts:item.pts.map(point)};
     }
     const [x,y] = point([item.x,item.y]);
+    if (item.type === 'shape') {
+      return {type:'shape',x,y,color,shape:['circle','square','triangle'].includes(item.shape) ? item.shape : 'circle',size:Math.max(40,Math.min(260,Number(item.size) || 120))};
+    }
     return {type:item.type,x,y,color,label:String(item.label || '').slice(0,item.type === 'player' ? 5 : 80)};
   });
   return {
-    version:10,
+    version:11,
     orientation:sourceOrientation,
     title:String(input.title || 'Hockey drill').slice(0,80),
     rink:['full','half','blank'].includes(input.rink) ? input.rink : 'full',
     items:next,
     legacy,
-    resized:sourceVersion !== 10
+    resized:sourceVersion !== 11
   };
 }
 function restore(input) {
@@ -643,6 +669,8 @@ document.querySelectorAll('[data-color]').forEach(button => button.addEventListe
   say(button.getAttribute('aria-label') + ' selected for new drawings.');
 }));
 $('object-label').addEventListener('input',() => { if (tool === 'player') playerLabel = $('object-label').value; else textLabel = $('object-label').value; });
+$('shape-kind').addEventListener('change',event => { shapeKind = event.target.value; say(TOOL.shape.hint); });
+$('shape-size').addEventListener('input',event => { shapeSize = Number(event.target.value); $('shape-size-value').textContent = shapeSize; });
 $('title').addEventListener('input',markDirty);
 $('rink').addEventListener('change',() => { cancelGesture(); snapshot(); rinkMode = $('rink').value; rink(); markDirty(); say(rinkMode === 'half' ? 'Showing the top half. Full rink shows all your drawings.' : 'Rink view changed.'); closeMobileMenu(); });
 function setOrientation(next) {
